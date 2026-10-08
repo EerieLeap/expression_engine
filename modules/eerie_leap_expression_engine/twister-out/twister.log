@@ -1,0 +1,8 @@
+2026-10-07 04:59:29,566 - twister - INFO - Using Ninja..
+2026-10-07 04:59:29,679 - twister - INFO - Zephyr version: v4.4.0-17068-g143d9e91fd05
+2026-10-07 04:59:29,681 - twister - DEBUG - Running cmake script /home/ubuntu/zephyr/workspace/zephyr/cmake/verify-toolchain.cmake
+2026-10-07 04:59:29,681 - twister - DEBUG - Calling cmake: /home/ubuntu/zephyr/.venv/bin/cmake -DFORMAT=json -P /home/ubuntu/zephyr/workspace/zephyr/cmake/verify-toolchain.cmake
+2026-10-07 04:59:29,991 - twister - DEBUG - Finished running /home/ubuntu/zephyr/workspace/zephyr/cmake/verify-toolchain.cmake
+2026-10-07 04:59:29,991 - twister - INFO - Using 'zephyr/gnu' toolchain variant.
+2026-10-07 04:59:31,050 - twister - DEBUG - Reading testsuite configuration files under /home/ubuntu/zephyr/workspace/project/modules/eerie_leap_expression_engine/modules/eerie_leap_expression_engine/tests/zephyr...
+2026-10-07 04:59:31,050 - twister - WARNING - No testsuites found at the specified location...

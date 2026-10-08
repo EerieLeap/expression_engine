@@ -1,0 +1,21 @@
+# Lets the repository be a west manifest on its own, so the Twister suite in
+# tests/zephyr can run without the gauge workspace (the same arrangement as
+# eerie_leap_rt_core). In the gauge workspace the repository is a plain module
+# pulled in through EXTRA_ZEPHYR_MODULES and this file is unused.
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: main
+      import:
+        # Only what the QEMU targets of the suite need.
+        name-allowlist:
+          - cmsis
+          - cmsis_6
+
+  self:
+    path: eerie_leap_expression_engine

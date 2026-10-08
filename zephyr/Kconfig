@@ -1,0 +1,57 @@
+menu "EerieLeap Expression Engine"
+
+config EXPRESSION_ENGINE
+	bool "EerieLeap expression engine"
+	depends on CPP
+	select REQUIRES_FULL_LIBCPP
+	help
+	  Compiler and allocation-free evaluator for sensor expressions
+	  (modules/eerie_leap_expression_engine). Needs CONFIG_STD_CPP23.
+
+if EXPRESSION_ENGINE
+
+# These size the compiler's scratch buffers and the evaluation stack, so they are
+# the ceiling of what a build can compile; Compile() takes a Limits argument that
+# can only lower them.
+
+config EXPRESSION_ENGINE_MAX_LENGTH
+	int "Maximum expression length in characters"
+	range 16 4096
+	default 256
+
+config EXPRESSION_ENGINE_MAX_INSTRUCTIONS
+	int "Maximum instructions per compiled expression"
+	range 8 1024
+	default 64
+	help
+	  Eight bytes each. The compiler keeps this many on its stack while it
+	  works and the program allocates exactly the number it uses.
+
+config EXPRESSION_ENGINE_MAX_VARIABLES
+	int "Maximum distinct variables per expression"
+	range 1 255
+	default 16
+
+config EXPRESSION_ENGINE_MAX_STACK
+	int "Evaluation stack slots"
+	range 4 255
+	default 16
+	help
+	  Four bytes each, on the stack of the thread that calls Evaluate().
+
+config EXPRESSION_ENGINE_MAX_NESTING
+	int "Maximum nesting depth"
+	range 2 64
+	default 16
+	help
+	  Bounds the parser's recursion. Each level costs roughly 0.6 to 1.5 kB of
+	  the compiling thread's stack on a 64-bit host, less on 32-bit targets.
+
+config EXPRESSION_ENGINE_MAX_ARGUMENTS
+	int "Maximum arguments of sum, avg, min and max"
+	range 1 64
+	default 8
+
+endif # EXPRESSION_ENGINE
+
+endmenu

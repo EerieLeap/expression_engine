@@ -1,0 +1,4 @@
+add_executable(expr_cli expr_cli.cpp)
+target_link_libraries(expr_cli PRIVATE eerie_leap::expression_engine)
+set_target_properties(expr_cli PROPERTIES CXX_STANDARD 23 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+expression_engine_apply_warnings(expr_cli)

@@ -1,0 +1,152 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  host:
+    name: ${{ matrix.compiler }} / ${{ matrix.preset }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc-13, gcc-14, clang-18]
+        preset: [dev, release]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build ${{ matrix.compiler }} \
+            $(case "${{ matrix.compiler }}" in gcc-*) echo "g++-${{ matrix.compiler }}" | sed 's/g++-gcc-/g++-/';; esac)
+
+      - name: Select compiler
+        run: |
+          case "${{ matrix.compiler }}" in
+            gcc-*)   echo "CXX=g++-${{ matrix.compiler }}" | sed 's/g++-gcc-/g++-/' >> "$GITHUB_ENV" ;;
+            clang-*) echo "CXX=clang++-${{ matrix.compiler }}" | sed 's/clang++-clang-/clang++-/' >> "$GITHUB_ENV" ;;
+          esac
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.preset }}
+
+      - name: Test
+        run: ctest --preset ${{ matrix.preset }}
+
+      - name: Example
+        run: ./build/${{ matrix.preset }}/examples/expr_cli "(x >> 8) & 0xFF" x=4660
+
+  no-exceptions:
+    name: gcc-14 / no-exceptions
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build gcc-14 g++-14
+      - name: Build and test
+        env:
+          CXX: g++-14
+        run: |
+          cmake --preset no-exceptions
+          cmake --build --preset no-exceptions
+          ctest --preset no-exceptions
+
+  format:
+    name: clang-format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-format-18
+      - name: Check
+        run: |
+          find include src tests examples -name '*.cpp' -o -name '*.hpp' | xargs clang-format-18 --dry-run -Werror
+
+  tidy:
+    name: clang-tidy (advisory)
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build clang-18 clang-tidy-18
+      - name: Build with clang-tidy
+        env:
+          CXX: clang++-18
+        run: |
+          cmake --preset tidy -DCMAKE_CXX_CLANG_TIDY=clang-tidy-18
+          cmake --build --preset tidy
+
+  fuzz:
+    name: libFuzzer smoke run
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build clang-18
+      - name: Build
+        run: |
+          cmake --preset fuzz -DCMAKE_CXX_COMPILER=clang++-18
+          cmake --build --preset fuzz --target compile_fuzzer
+      - name: Run for one minute
+        run: |
+          mkdir -p corpus
+          printf 'x * 4 + 1.6' > corpus/basic
+          printf '(x >> 8) & 0xFF' > corpus/bitwise
+          printf 'x ? sum(1, y, 2) : atan2(x, -y) ^ 2' > corpus/mixed
+          ./build/fuzz/tests/compile_fuzzer -max_total_time=60 -max_len=256 corpus
+
+  zephyr:
+    name: Twister (native_sim)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: eerie_leap_expression_engine
+
+      # native_sim builds 32-bit binaries.
+      - name: Install multilib toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gcc-multilib g++-multilib
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          app-path: eerie_leap_expression_engine
+          toolchains: arm-zephyr-eabi
+
+      - name: Run the suite
+        working-directory: eerie_leap_expression_engine
+        run: west twister -c --disable-warnings-as-errors -O ./twister-out -T tests/zephyr -p native_sim
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: twister-results
+          path: |
+            eerie_leap_expression_engine/twister-out/twister.xml
+            eerie_leap_expression_engine/twister-out/twister.json
+          if-no-files-found: ignore

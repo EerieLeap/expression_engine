@@ -1,0 +1,4 @@
+name: eerie_leap_expression_engine
+build:
+  cmake: zephyr
+  kconfig: zephyr/Kconfig

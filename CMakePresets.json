@@ -1,0 +1,75 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "EXPRESSION_ENGINE_BUILD_TESTS": "ON",
+                "EXPRESSION_ENGINE_BUILD_EXAMPLES": "ON",
+                "EXPRESSION_ENGINE_WERROR": "ON"
+            }
+        },
+        {
+            "name": "dev",
+            "displayName": "Debug with AddressSanitizer and UndefinedBehaviorSanitizer",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "EXPRESSION_ENGINE_SANITIZERS": "ON"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "inherits": "base",
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+        },
+        {
+            "name": "no-exceptions",
+            "displayName": "Release without exceptions and RTTI",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS": "-fno-exceptions -fno-rtti"
+            }
+        },
+        {
+            "name": "tidy",
+            "displayName": "Debug with clang-tidy",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_CLANG_TIDY": "clang-tidy"
+            }
+        },
+        {
+            "name": "fuzz",
+            "displayName": "libFuzzer harness (clang)",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "EXPRESSION_ENGINE_SANITIZERS": "ON",
+                "EXPRESSION_ENGINE_FUZZ": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        { "name": "dev", "configurePreset": "dev" },
+        { "name": "release", "configurePreset": "release" },
+        { "name": "no-exceptions", "configurePreset": "no-exceptions" },
+        { "name": "tidy", "configurePreset": "tidy" },
+        { "name": "fuzz", "configurePreset": "fuzz" }
+    ],
+    "testPresets": [
+        { "name": "dev", "configurePreset": "dev", "output": { "outputOnFailure": true } },
+        { "name": "release", "configurePreset": "release", "output": { "outputOnFailure": true } },
+        { "name": "no-exceptions", "configurePreset": "no-exceptions", "output": { "outputOnFailure": true } },
+        { "name": "tidy", "configurePreset": "tidy", "output": { "outputOnFailure": true } }
+    ]
+}
