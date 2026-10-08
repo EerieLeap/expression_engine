@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [gcc-13, gcc-14, clang-18]
+        compiler: [gcc-13, gcc-14, clang-19]
         preset: [dev, release]
     steps:
       - uses: actions/checkout@v4
@@ -24,8 +24,12 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ninja-build ${{ matrix.compiler }} \
-            $(case "${{ matrix.compiler }}" in gcc-*) echo "g++-${{ matrix.compiler }}" | sed 's/g++-gcc-/g++-/';; esac)
+          sudo apt-get install -y --no-install-recommends ninja-build
+          case "${{ matrix.compiler }}" in
+            gcc-*)   sudo apt-get install -y --no-install-recommends ${{ matrix.compiler }} $(echo "${{ matrix.compiler }}" | sed 's/gcc/g++/') ;;
+            # Clang 18 with libstdc++ 13 does not expose std::expected; take a current clang from apt.llvm.org.
+            clang-*) wget -qO- https://apt.llvm.org/llvm.sh | sudo bash -s -- $(echo "${{ matrix.compiler }}" | sed 's/clang-//') ;;
+          esac
 
       - name: Select compiler
         run: |
@@ -69,12 +73,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install clang-format
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends clang-format-18
+        # The same major version as the one the sources were formatted with; majors differ in wrapping.
+        run: pip install clang-format==23.1.1
       - name: Check
         run: |
-          find include src tests examples -name '*.cpp' -o -name '*.hpp' | xargs clang-format-18 --dry-run -Werror
+          find include src tests examples -name '*.cpp' -o -name '*.hpp' | xargs clang-format --dry-run -Werror
 
   tidy:
     name: clang-tidy (advisory)
@@ -85,12 +88,14 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ninja-build clang-18 clang-tidy-18
+          sudo apt-get install -y --no-install-recommends ninja-build
+          wget -qO- https://apt.llvm.org/llvm.sh | sudo bash -s -- 19
+          sudo apt-get install -y --no-install-recommends clang-tidy-19
       - name: Build with clang-tidy
         env:
-          CXX: clang++-18
+          CXX: clang++-19
         run: |
-          cmake --preset tidy -DCMAKE_CXX_CLANG_TIDY=clang-tidy-18
+          cmake --preset tidy -DCMAKE_CXX_CLANG_TIDY=clang-tidy-19
           cmake --build --preset tidy
 
   fuzz:
@@ -101,10 +106,11 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ninja-build clang-18
+          sudo apt-get install -y --no-install-recommends ninja-build
+          wget -qO- https://apt.llvm.org/llvm.sh | sudo bash -s -- 19
       - name: Build
         run: |
-          cmake --preset fuzz -DCMAKE_CXX_COMPILER=clang++-18
+          cmake --preset fuzz -DCMAKE_CXX_COMPILER=clang++-19
           cmake --build --preset fuzz --target compile_fuzzer
       - name: Run for one minute
         run: |

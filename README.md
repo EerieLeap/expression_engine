@@ -55,7 +55,7 @@ $ expr_cli "(raw >> 8) & 0xFF" raw=4660
 
 ## Building and testing on the host
 
-Requires CMake 3.25, Ninja and GCC 13 or Clang 18 or newer. GoogleTest is fetched automatically
+Requires CMake 3.25, Ninja and GCC 13 or Clang 19 or newer (Clang 18 with libstdc++ 13 lacks `std::expected`). GoogleTest is fetched automatically
 (`EXPRESSION_ENGINE_FETCH_GTEST=OFF` uses an installed one instead).
 
 ```sh

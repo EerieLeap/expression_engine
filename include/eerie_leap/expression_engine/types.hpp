@@ -1,6 +1,11 @@
 #pragma once
 
 #include <cstdint>
+#include <version>
+
+#if !defined(__cpp_lib_expected)
+#error "eerie_leap_expression_engine needs std::expected: GCC 12+, or Clang 19+ with libstdc++ 13+"
+#endif
 
 namespace eerie_leap::expression_engine {
 

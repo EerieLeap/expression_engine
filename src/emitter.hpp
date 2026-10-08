@@ -50,9 +50,8 @@ public:
     [[nodiscard]] Result EmitUnary(Op op) noexcept;                    // Neg, BitNot, ToBool
     [[nodiscard]] Result EmitBinary(Op op) noexcept;
     [[nodiscard]] Result EmitCall(FunctionId id, std::uint8_t argc) noexcept;
-    [[nodiscard]] std::expected<JumpRef, CompileErrorCode> EmitJump(
-        Op op
-    ) noexcept;                                           // AndJump, OrJump, JumpIfFalse, Jump
+    // AndJump, OrJump, JumpIfFalse, Jump
+    [[nodiscard]] std::expected<JumpRef, CompileErrorCode> EmitJump(Op op) noexcept;
     [[nodiscard]] Result PatchJump(JumpRef ref) noexcept; // the target is the next instruction
     [[nodiscard]] Result EmitEnd() noexcept;
 
