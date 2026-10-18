@@ -8,22 +8,22 @@
 // are the hard ceiling of what one build can compile. The host build sets them from CMake cache
 // entries and the Zephyr module from Kconfig; a build that sets none gets these defaults.
 #ifndef EXPRESSION_ENGINE_MAX_LENGTH
-#define EXPRESSION_ENGINE_MAX_LENGTH 256
+    #define EXPRESSION_ENGINE_MAX_LENGTH 256
 #endif
 #ifndef EXPRESSION_ENGINE_MAX_INSTRUCTIONS
-#define EXPRESSION_ENGINE_MAX_INSTRUCTIONS 64
+    #define EXPRESSION_ENGINE_MAX_INSTRUCTIONS 64
 #endif
 #ifndef EXPRESSION_ENGINE_MAX_VARIABLES
-#define EXPRESSION_ENGINE_MAX_VARIABLES 16
+    #define EXPRESSION_ENGINE_MAX_VARIABLES 16
 #endif
 #ifndef EXPRESSION_ENGINE_MAX_STACK
-#define EXPRESSION_ENGINE_MAX_STACK 16
+    #define EXPRESSION_ENGINE_MAX_STACK 16
 #endif
 #ifndef EXPRESSION_ENGINE_MAX_NESTING
-#define EXPRESSION_ENGINE_MAX_NESTING 16
+    #define EXPRESSION_ENGINE_MAX_NESTING 16
 #endif
 #ifndef EXPRESSION_ENGINE_MAX_ARGUMENTS
-#define EXPRESSION_ENGINE_MAX_ARGUMENTS 8
+    #define EXPRESSION_ENGINE_MAX_ARGUMENTS 8
 #endif
 
 namespace eerie_leap::expression_engine {

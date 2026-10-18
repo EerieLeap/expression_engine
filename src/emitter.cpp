@@ -6,7 +6,9 @@
 
 namespace eerie_leap::expression_engine::detail {
 
-Emitter::Emitter(std::string_view text, const Limits& limits) noexcept : text_(text), limits_(limits) {}
+Emitter::Emitter(std::string_view text, const Limits& limits) noexcept :
+    text_(text),
+    limits_(limits) {}
 
 Emitter::Result Emitter::Append(Instruction instruction, int stack_delta) noexcept {
     if(size_ >= limits_.max_instructions) {
@@ -42,7 +44,7 @@ std::size_t Emitter::PendingCount() const noexcept {
 Emitter::Result Emitter::Flush() noexcept {
     const std::size_t first = operand_count_ - PendingCount();
     for(std::size_t i = first; i < operand_count_; ++i) {
-        if(const auto r = Append(Instruction{Op::PushConst, 0, 0, operands_[i].value}, +1); !r) {
+        if(const auto r = Append(Instruction{ Op::PushConst, 0, 0, operands_[i].value }, +1); !r) {
             return r;
         }
         operands_[i].pending = false;
@@ -59,13 +61,13 @@ std::expected<std::uint16_t, CompileErrorCode> Emitter::Intern(std::string_view 
     if(name_count_ >= limits_.max_variables) {
         return std::unexpected(CompileErrorCode::TooManyVariables);
     }
-    names_[name_count_] =
-        NameRef{static_cast<std::uint16_t>(name.data() - text_.data()), static_cast<std::uint16_t>(name.size())};
+    names_[name_count_] = NameRef{ static_cast<std::uint16_t>(name.data() - text_.data()),
+        static_cast<std::uint16_t>(name.size()) };
     return name_count_++;
 }
 
 Emitter::Result Emitter::EmitConst(Value value) noexcept {
-    return PushOperand(Operand{true, value});
+    return PushOperand(Operand{ true, value });
 }
 
 Emitter::Result Emitter::EmitVariable(std::string_view name) noexcept {
@@ -76,10 +78,10 @@ Emitter::Result Emitter::EmitVariable(std::string_view name) noexcept {
     if(!index) {
         return std::unexpected(index.error());
     }
-    if(const auto r = Append(Instruction{Op::PushVar, 0, *index, 0.0f}, +1); !r) {
+    if(const auto r = Append(Instruction{ Op::PushVar, 0, *index, 0.0f }, +1); !r) {
         return r;
     }
-    return PushOperand(Operand{false, 0.0f});
+    return PushOperand(Operand{ false, 0.0f });
 }
 
 Emitter::Result Emitter::EmitUnary(Op op) noexcept {
@@ -88,7 +90,7 @@ Emitter::Result Emitter::EmitUnary(Op op) noexcept {
         top.value = ApplyUnary(op, top.value);
         return {};
     }
-    return Append(Instruction{op, 0, 0, 0.0f}, 0);
+    return Append(Instruction{ op, 0, 0, 0.0f }, 0);
 }
 
 Emitter::Result Emitter::EmitBinary(Op op) noexcept {
@@ -104,11 +106,11 @@ Emitter::Result Emitter::EmitBinary(Op op) noexcept {
     if(const auto r = Flush(); !r) {
         return r;
     }
-    if(const auto r = Append(Instruction{op, 0, 0, 0.0f}, -1); !r) {
+    if(const auto r = Append(Instruction{ op, 0, 0, 0.0f }, -1); !r) {
         return r;
     }
     --operand_count_;
-    operands_[operand_count_ - 1] = Operand{false, 0.0f};
+    operands_[operand_count_ - 1] = Operand{ false, 0.0f };
     return {};
 }
 
@@ -120,7 +122,7 @@ Emitter::Result Emitter::EmitCall(FunctionId id, std::uint8_t argc) noexcept {
         for(std::size_t i = 0; i < argc; ++i) {
             args[i] = operands_[first + i].value;
         }
-        operands_[first] = Operand{true, Invoke(id, std::span<const Value>{args.data(), argc})};
+        operands_[first] = Operand{ true, Invoke(id, std::span<const Value>{ args.data(), argc }) };
         operand_count_ = first + 1;
         return {};
     }
@@ -128,12 +130,12 @@ Emitter::Result Emitter::EmitCall(FunctionId id, std::uint8_t argc) noexcept {
     if(const auto r = Flush(); !r) {
         return r;
     }
-    if(const auto r = Append(Instruction{Op::Call, std::to_underlying(id), argc, 0.0f}, 1 - static_cast<int>(argc));
-       !r) {
+    if(const auto r = Append(Instruction{ Op::Call, std::to_underlying(id), argc, 0.0f }, 1 - static_cast<int>(argc));
+        !r) {
         return r;
     }
     operand_count_ = first;
-    return PushOperand(Operand{false, 0.0f});
+    return PushOperand(Operand{ false, 0.0f });
 }
 
 std::expected<JumpRef, CompileErrorCode> Emitter::EmitJump(Op op) noexcept {
@@ -146,18 +148,15 @@ std::expected<JumpRef, CompileErrorCode> Emitter::EmitJump(Op op) noexcept {
     if(pops) {
         --operand_count_;
     }
-    if(const auto r = Append(Instruction{op, 0, 0, 0.0f}, pops ? -1 : 0); !r) {
+    if(const auto r = Append(Instruction{ op, 0, 0, 0.0f }, pops ? -1 : 0); !r) {
         return std::unexpected(r.error());
     }
 
     // AndJump and OrJump push the result on the taken path; JumpIfFalse and Jump push nothing.
     const bool pushes = op == Op::AndJump || op == Op::OrJump;
     const auto extra = static_cast<std::uint8_t>(pushes ? 1 : 0);
-    return JumpRef{
-        index,
-        static_cast<std::uint8_t>(materialized_ + extra),
-        static_cast<std::uint8_t>(operand_count_ + extra)
-    };
+    return JumpRef{ index, static_cast<std::uint8_t>(materialized_ + extra),
+        static_cast<std::uint8_t>(operand_count_ + extra) };
 }
 
 Emitter::Result Emitter::PatchJump(JumpRef ref) noexcept {
@@ -174,7 +173,7 @@ Emitter::Result Emitter::EmitEnd() noexcept {
     if(const auto r = Flush(); !r) {
         return r;
     }
-    return Append(Instruction{Op::End, 0, 0, 0.0f}, 0);
+    return Append(Instruction{ Op::End, 0, 0, 0.0f }, 0);
 }
 
 } // namespace eerie_leap::expression_engine::detail

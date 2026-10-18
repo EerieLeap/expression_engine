@@ -45,7 +45,9 @@ public:
     static constexpr int kPow = 10;
     static constexpr int kPrimary = 11;
 
-    ExpressionGenerator(std::uint32_t seed, std::span<const Binding> variables) : rng_(seed), variables_(variables) {}
+    ExpressionGenerator(std::uint32_t seed, std::span<const Binding> variables) :
+        rng_(seed),
+        variables_(variables) {}
 
     GeneratedExpression Generate(int depth) {
         if(depth <= 0) {
@@ -78,44 +80,44 @@ private:
         int precedence;
     };
 
-    static constexpr std::array<ConstantSpec, 16> kConstants{{
-        {"0", 0.0f},
-        {"1", 1.0f},
-        {"2", 2.0f},
-        {"3", 3.0f},
-        {"4", 4.0f},
-        {"7", 7.0f},
-        {"10", 10.0f},
-        {"255", 255.0f},
-        {"0.5", 0.5f},
-        {"1.5", 1.5f},
-        {"2.5", 2.5f},
-        {"0.1", 0.1f},
-        {"1e3", 1000.0f},
-        {"0xFF", 255.0f},
-        {"0x10", 16.0f},
-        {"0b101", 5.0f},
-    }};
+    static constexpr std::array<ConstantSpec, 16> kConstants{ {
+        { "0", 0.0f },
+        { "1", 1.0f },
+        { "2", 2.0f },
+        { "3", 3.0f },
+        { "4", 4.0f },
+        { "7", 7.0f },
+        { "10", 10.0f },
+        { "255", 255.0f },
+        { "0.5", 0.5f },
+        { "1.5", 1.5f },
+        { "2.5", 2.5f },
+        { "0.1", 0.1f },
+        { "1e3", 1000.0f },
+        { "0xFF", 255.0f },
+        { "0x10", 16.0f },
+        { "0b101", 5.0f },
+    } };
 
-    static constexpr std::array<OperatorSpec, 17> kOperators{{
-        {"||", kOr},
-        {"&&", kAnd},
-        {"<", kCompare},
-        {">", kCompare},
-        {"<=", kCompare},
-        {">=", kCompare},
-        {"==", kCompare},
-        {"!=", kCompare},
-        {"|", kBitOr},
-        {"&", kBitAnd},
-        {"<<", kShift},
-        {">>", kShift},
-        {"+", kAdd},
-        {"-", kAdd},
-        {"*", kMul},
-        {"/", kMul},
-        {"^", kPow},
-    }};
+    static constexpr std::array<OperatorSpec, 17> kOperators{ {
+        { "||", kOr },
+        { "&&", kAnd },
+        { "<", kCompare },
+        { ">", kCompare },
+        { "<=", kCompare },
+        { ">=", kCompare },
+        { "==", kCompare },
+        { "!=", kCompare },
+        { "|", kBitOr },
+        { "&", kBitAnd },
+        { "<<", kShift },
+        { ">>", kShift },
+        { "+", kAdd },
+        { "-", kAdd },
+        { "*", kMul },
+        { "/", kMul },
+        { "^", kPow },
+    } };
 
     int Pick(int count) {
         return std::uniform_int_distribution<int>(0, count - 1)(rng_);
@@ -180,10 +182,10 @@ private:
     GeneratedExpression Leaf() {
         if(Pick(2) == 0) {
             const ConstantSpec& c = kConstants[static_cast<std::size_t>(Pick(static_cast<int>(kConstants.size())))];
-            return {std::string(c.text), std::string(c.text), c.value, kPrimary};
+            return { std::string(c.text), std::string(c.text), c.value, kPrimary };
         }
         const Binding& b = variables_[static_cast<std::size_t>(Pick(static_cast<int>(variables_.size())))];
-        return {std::string(b.name), std::string(b.name), b.value, kPrimary};
+        return { std::string(b.name), std::string(b.name), b.value, kPrimary };
     }
 
     GeneratedExpression Unary(int depth) {
@@ -192,7 +194,7 @@ private:
         const std::string op = negate ? "-" : "~";
         const Value value = negate ? -operand.value : detail::BitNot(operand.value);
         const std::string minimal = op + (operand.precedence < kUnary ? Wrap(operand.minimal) : operand.minimal);
-        return {Wrap(op + operand.full), minimal, value, kUnary};
+        return { Wrap(op + operand.full), minimal, value, kUnary };
     }
 
     GeneratedExpression Binary(int depth) {
@@ -213,7 +215,7 @@ private:
         }
 
         const std::string spaced = " " + std::string(op.text) + " ";
-        return {Wrap(lhs.full + spaced + rhs.full), lhs_minimal + spaced + rhs_minimal, value, op.precedence};
+        return { Wrap(lhs.full + spaced + rhs.full), lhs_minimal + spaced + rhs_minimal, value, op.precedence };
     }
 
     GeneratedExpression Ternary(int depth) {
@@ -223,12 +225,8 @@ private:
         const Value value = condition.value != 0.0f ? when_true.value : when_false.value;
         // Only a ternary condition needs parentheses; both branches take any expression.
         const std::string condition_minimal = condition.precedence < kOr ? Wrap(condition.minimal) : condition.minimal;
-        return {
-            Wrap(condition.full + " ? " + when_true.full + " : " + when_false.full),
-            condition_minimal + " ? " + when_true.minimal + " : " + when_false.minimal,
-            value,
-            kTernary
-        };
+        return { Wrap(condition.full + " ? " + when_true.full + " : " + when_false.full),
+            condition_minimal + " ? " + when_true.minimal + " : " + when_false.minimal, value, kTernary };
     }
 
     GeneratedExpression Call(int depth) {
@@ -236,8 +234,8 @@ private:
         const std::size_t argc = spec.max_args == kVariadic ? static_cast<std::size_t>(1 + Pick(3)) : spec.min_args;
 
         std::array<Value, limits::kMaxArguments> values{};
-        std::string full{spec.name};
-        std::string minimal{spec.name};
+        std::string full{ spec.name };
+        std::string minimal{ spec.name };
         full += '(';
         minimal += '(';
         for(std::size_t i = 0; i < argc; ++i) {
@@ -249,8 +247,8 @@ private:
         full += ')';
         minimal += ')';
 
-        const Value value = Invoke(spec.id, std::span<const Value>{values.data(), argc});
-        return {full, minimal, value, kPrimary};
+        const Value value = Invoke(spec.id, std::span<const Value>{ values.data(), argc });
+        return { full, minimal, value, kPrimary };
     }
 
     std::mt19937 rng_;

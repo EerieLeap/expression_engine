@@ -45,18 +45,16 @@ TEST(Compiler, RejectsTextLongerThanMaxLength) {
     const std::string over(limits::kMaxLength, ' ');
     const auto program = Compile(over + "1");
     ASSERT_FALSE(program);
-    EXPECT_EQ(program.error(), (CompileError{CompileErrorCode::TooLong, limits::kMaxLength, 1}));
+    EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::TooLong, limits::kMaxLength, 1 }));
 }
 
 TEST(Compiler, ClampsLimitsToTheCaps) {
-    const Limits huge{
-        .max_length = 65535,
+    const Limits huge{ .max_length = 65535,
         .max_instructions = 65535,
         .max_variables = 65535,
         .max_stack = 255,
         .max_nesting = 255,
-        .max_arguments = 255
-    };
+        .max_arguments = 255 };
     EXPECT_EQ(huge.Clamped(), Limits{});
 
     const std::string over(limits::kMaxLength, ' ');
@@ -76,7 +74,7 @@ TEST(Compiler, TooManyVariablesAtTheCap) {
     text += "+v" + std::to_string(limits::kMaxVariables);
     const auto program = Compile(text);
     ASSERT_FALSE(program);
-    EXPECT_EQ(program.error(), (CompileError{CompileErrorCode::TooManyVariables, position, 3}));
+    EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::TooManyVariables, position, 3 }));
 }
 
 TEST(Compiler, TooManyInstructionsAtTheCap) {
@@ -94,7 +92,7 @@ TEST(Compiler, TooManyInstructionsAtTheCap) {
     text += "+x";
     const auto program = Compile(text);
     ASSERT_FALSE(program);
-    EXPECT_EQ(program.error(), (CompileError{CompileErrorCode::TooManyInstructions, position, 1}));
+    EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::TooManyInstructions, position, 1 }));
 }
 
 TEST(Compiler, NestingTooDeepAtTheCap) {
@@ -106,7 +104,7 @@ TEST(Compiler, NestingTooDeepAtTheCap) {
     ASSERT_FALSE(program);
     EXPECT_EQ(
         program.error(),
-        (CompileError{CompileErrorCode::NestingTooDeep, static_cast<Position>(limits::kMaxNesting), 1})
+        (CompileError{ CompileErrorCode::NestingTooDeep, static_cast<Position>(limits::kMaxNesting), 1 })
     );
 }
 
@@ -120,41 +118,41 @@ TEST(Compiler, StackTooDeepAtTheCap) {
     text += "x+x" + std::string(limits::kMaxStack, ')');
     const auto program = Compile(text);
     ASSERT_FALSE(program);
-    EXPECT_EQ(program.error(), (CompileError{CompileErrorCode::StackTooDeep, position, 1}));
+    EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::StackTooDeep, position, 1 }));
 }
 
 TEST(Compiler, HonoursLoweredLimits) {
     const auto resource = std::pmr::get_default_resource();
 
-    EXPECT_TRUE(Compile("x * 4", resource, {.max_instructions = 4}));
-    auto program = Compile("x * 4 + 1.6", resource, {.max_instructions = 4});
+    EXPECT_TRUE(Compile("x * 4", resource, { .max_instructions = 4 }));
+    auto program = Compile("x * 4 + 1.6", resource, { .max_instructions = 4 });
     ASSERT_FALSE(program);
     EXPECT_EQ(program.error().code, CompileErrorCode::TooManyInstructions);
 
-    EXPECT_TRUE(Compile("x + x", resource, {.max_variables = 1}));
-    program = Compile("x + y", resource, {.max_variables = 1});
+    EXPECT_TRUE(Compile("x + x", resource, { .max_variables = 1 }));
+    program = Compile("x + y", resource, { .max_variables = 1 });
     ASSERT_FALSE(program);
-    EXPECT_EQ(program.error(), (CompileError{CompileErrorCode::TooManyVariables, 4, 1}));
+    EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::TooManyVariables, 4, 1 }));
 
-    EXPECT_TRUE(Compile("x + y", resource, {.max_stack = 2}));
-    program = Compile("x + y * z", resource, {.max_stack = 2});
+    EXPECT_TRUE(Compile("x + y", resource, { .max_stack = 2 }));
+    program = Compile("x + y * z", resource, { .max_stack = 2 });
     ASSERT_FALSE(program);
-    EXPECT_EQ(program.error(), (CompileError{CompileErrorCode::StackTooDeep, 8, 1}));
+    EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::StackTooDeep, 8, 1 }));
 
-    EXPECT_TRUE(Compile("(1)", resource, {.max_nesting = 1}));
-    program = Compile("((1))", resource, {.max_nesting = 1});
+    EXPECT_TRUE(Compile("(1)", resource, { .max_nesting = 1 }));
+    program = Compile("((1))", resource, { .max_nesting = 1 });
     ASSERT_FALSE(program);
-    EXPECT_EQ(program.error(), (CompileError{CompileErrorCode::NestingTooDeep, 1, 1}));
+    EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::NestingTooDeep, 1, 1 }));
 
-    EXPECT_TRUE(Compile("sum(1, 2)", resource, {.max_arguments = 2}));
-    program = Compile("sum(1, 2, 3)", resource, {.max_arguments = 2});
+    EXPECT_TRUE(Compile("sum(1, 2)", resource, { .max_arguments = 2 }));
+    program = Compile("sum(1, 2, 3)", resource, { .max_arguments = 2 });
     ASSERT_FALSE(program);
-    EXPECT_EQ(program.error(), (CompileError{CompileErrorCode::WrongArgumentCount, 0, 3}));
+    EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::WrongArgumentCount, 0, 3 }));
 
-    EXPECT_TRUE(Compile("1+2", resource, {.max_length = 3}));
-    program = Compile("1+22", resource, {.max_length = 3});
+    EXPECT_TRUE(Compile("1+2", resource, { .max_length = 3 }));
+    program = Compile("1+22", resource, { .max_length = 3 });
     ASSERT_FALSE(program);
-    EXPECT_EQ(program.error(), (CompileError{CompileErrorCode::TooLong, 3, 1}));
+    EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::TooLong, 3, 1 }));
 }
 
 #if defined(__cpp_exceptions)
@@ -162,7 +160,7 @@ TEST(Compiler, ReportsOutOfMemoryWhenTheResourceFails) {
     testing::CountingResource failing(true);
     const auto program = Compile("x + 1", &failing);
     ASSERT_FALSE(program);
-    EXPECT_EQ(program.error(), (CompileError{CompileErrorCode::OutOfMemory, 0, 0}));
+    EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::OutOfMemory, 0, 0 }));
 }
 #endif
 
@@ -203,7 +201,7 @@ TEST(Compiler, NumbersVariablesInOrderOfFirstAppearance) {
     for(const std::string_view name : program->VariableNames()) {
         names.push_back(name);
     }
-    EXPECT_EQ(names, (std::vector<std::string_view>{"b", "a"}));
+    EXPECT_EQ(names, (std::vector<std::string_view>{ "b", "a" }));
 }
 
 TEST(Compiler, ReportsExactMaxStackDepth) {

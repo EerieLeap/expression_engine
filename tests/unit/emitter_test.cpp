@@ -183,7 +183,7 @@ TEST(Emitter, AndJumpArrivesWithTheResultOnTheStack) {
 }
 
 TEST(Emitter, ReportsTooManyInstructions) {
-    Emitter emitter(kText, Limits{.max_instructions = 3});
+    Emitter emitter(kText, Limits{ .max_instructions = 3 });
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
     ASSERT_TRUE(emitter.EmitVariable(Slice(4, 1)));
     ASSERT_TRUE(emitter.EmitBinary(Op::Add));
@@ -193,7 +193,7 @@ TEST(Emitter, ReportsTooManyInstructions) {
 }
 
 TEST(Emitter, ReportsStackTooDeepForMaterializedValuesOnly) {
-    Emitter emitter(kText, Limits{.max_stack = 2});
+    Emitter emitter(kText, Limits{ .max_stack = 2 });
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
     ASSERT_TRUE(emitter.EmitVariable(Slice(4, 1)));
     const auto third = emitter.EmitVariable(Slice(12, 1));
@@ -201,7 +201,7 @@ TEST(Emitter, ReportsStackTooDeepForMaterializedValuesOnly) {
     EXPECT_EQ(third.error(), CompileErrorCode::StackTooDeep);
 
     // Pending constants never touch the evaluation stack.
-    Emitter folding(kText, Limits{.max_stack = 1});
+    Emitter folding(kText, Limits{ .max_stack = 1 });
     for(int i = 0; i < 5; ++i) {
         ASSERT_TRUE(folding.EmitConst(1.0f));
     }
@@ -214,7 +214,7 @@ TEST(Emitter, ReportsStackTooDeepForMaterializedValuesOnly) {
 }
 
 TEST(Emitter, ReportsTooManyVariables) {
-    Emitter emitter(kText, Limits{.max_variables = 1});
+    Emitter emitter(kText, Limits{ .max_variables = 1 });
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
     const auto second = emitter.EmitVariable(Slice(4, 1));
     ASSERT_FALSE(second);

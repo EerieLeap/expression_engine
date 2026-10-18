@@ -38,12 +38,9 @@ constexpr bool IsDigitOf(int base, char c) noexcept {
     return IsDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 }
 
-constexpr std::expected<Token, CompileError> Fail(
-    CompileErrorCode code,
-    Position position,
-    std::uint16_t length
-) noexcept {
-    return std::unexpected(CompileError{code, position, length});
+constexpr std::expected<Token, CompileError>
+Fail(CompileErrorCode code, Position position, std::uint16_t length) noexcept {
+    return std::unexpected(CompileError{ code, position, length });
 }
 
 } // namespace
@@ -70,13 +67,13 @@ char Lexer::At(std::size_t offset) const noexcept {
 }
 
 Token Lexer::Single(TokenKind kind) noexcept {
-    const Token token{kind, position_, 1, 0.0f};
+    const Token token{ kind, position_, 1, 0.0f };
     ++position_;
     return token;
 }
 
 Token Lexer::Double(TokenKind kind) noexcept {
-    const Token token{kind, position_, 2, 0.0f};
+    const Token token{ kind, position_, 2, 0.0f };
     position_ = static_cast<Position>(position_ + 2);
     return token;
 }
@@ -87,7 +84,7 @@ std::expected<Token, CompileError> Lexer::Scan() noexcept {
     }
 
     if(position_ >= text_.size()) {
-        return Token{TokenKind::End, position_, 0, 0.0f};
+        return Token{ TokenKind::End, position_, 0, 0.0f };
     }
 
     const char c = text_[position_];
@@ -100,66 +97,66 @@ std::expected<Token, CompileError> Lexer::Scan() noexcept {
     }
 
     switch(c) {
-    case '(':
-        return Single(TokenKind::LParen);
-    case ')':
-        return Single(TokenKind::RParen);
-    case ',':
-        return Single(TokenKind::Comma);
-    case '?':
-        return Single(TokenKind::Question);
-    case ':':
-        return Single(TokenKind::Colon);
-    case '+':
-        return Single(TokenKind::Plus);
-    case '-':
-        return Single(TokenKind::Minus);
-    case '*':
-        return Single(TokenKind::Star);
-    case '/':
-        return Single(TokenKind::Slash);
-    case '^':
-        return Single(TokenKind::Caret);
-    case '~':
-        return Single(TokenKind::Tilde);
-    case '<':
-        if(At(1) == '=') {
-            return Double(TokenKind::Le);
-        }
-        if(At(1) == '<') {
-            return Double(TokenKind::Shl);
-        }
-        return Single(TokenKind::Lt);
-    case '>':
-        if(At(1) == '=') {
-            return Double(TokenKind::Ge);
-        }
-        if(At(1) == '>') {
-            return Double(TokenKind::Shr);
-        }
-        return Single(TokenKind::Gt);
-    case '=':
-        if(At(1) == '=') {
-            return Double(TokenKind::Eq);
-        }
-        return Fail(CompileErrorCode::AssignmentNotSupported, position_, 1);
-    case '!':
-        if(At(1) == '=') {
-            return Double(TokenKind::Ne);
-        }
-        return Fail(CompileErrorCode::UnexpectedCharacter, position_, 1);
-    case '&':
-        if(At(1) == '&') {
-            return Double(TokenKind::AndAnd);
-        }
-        return Single(TokenKind::Amp);
-    case '|':
-        if(At(1) == '|') {
-            return Double(TokenKind::OrOr);
-        }
-        return Single(TokenKind::Pipe);
-    default:
-        return Fail(CompileErrorCode::UnexpectedCharacter, position_, 1);
+        case '(':
+            return Single(TokenKind::LParen);
+        case ')':
+            return Single(TokenKind::RParen);
+        case ',':
+            return Single(TokenKind::Comma);
+        case '?':
+            return Single(TokenKind::Question);
+        case ':':
+            return Single(TokenKind::Colon);
+        case '+':
+            return Single(TokenKind::Plus);
+        case '-':
+            return Single(TokenKind::Minus);
+        case '*':
+            return Single(TokenKind::Star);
+        case '/':
+            return Single(TokenKind::Slash);
+        case '^':
+            return Single(TokenKind::Caret);
+        case '~':
+            return Single(TokenKind::Tilde);
+        case '<':
+            if(At(1) == '=') {
+                return Double(TokenKind::Le);
+            }
+            if(At(1) == '<') {
+                return Double(TokenKind::Shl);
+            }
+            return Single(TokenKind::Lt);
+        case '>':
+            if(At(1) == '=') {
+                return Double(TokenKind::Ge);
+            }
+            if(At(1) == '>') {
+                return Double(TokenKind::Shr);
+            }
+            return Single(TokenKind::Gt);
+        case '=':
+            if(At(1) == '=') {
+                return Double(TokenKind::Eq);
+            }
+            return Fail(CompileErrorCode::AssignmentNotSupported, position_, 1);
+        case '!':
+            if(At(1) == '=') {
+                return Double(TokenKind::Ne);
+            }
+            return Fail(CompileErrorCode::UnexpectedCharacter, position_, 1);
+        case '&':
+            if(At(1) == '&') {
+                return Double(TokenKind::AndAnd);
+            }
+            return Single(TokenKind::Amp);
+        case '|':
+            if(At(1) == '|') {
+                return Double(TokenKind::OrOr);
+            }
+            return Single(TokenKind::Pipe);
+        default:
+            return Fail(CompileErrorCode::UnexpectedCharacter, position_, 1);
     }
 }
 
@@ -183,11 +180,11 @@ std::expected<Token, CompileError> Lexer::ScanNumber() noexcept {
     const auto length = static_cast<std::uint16_t>(ptr - begin);
 
     if(ec != std::errc{}) {
-        return Fail(CompileErrorCode::InvalidNumber, start, length == 0 ? std::uint16_t{1} : length);
+        return Fail(CompileErrorCode::InvalidNumber, start, length == 0 ? std::uint16_t{ 1 } : length);
     }
 
     position_ = static_cast<Position>(start + length);
-    return Token{TokenKind::Number, start, length, value};
+    return Token{ TokenKind::Number, start, length, value };
 }
 
 // "0x" or "0b" prefix: a 32-bit pattern read as a signed integer, which must survive the round
@@ -218,7 +215,7 @@ std::expected<Token, CompileError> Lexer::ScanIntegerLiteral(int base) noexcept 
     }
 
     position_ = static_cast<Position>(digits_end);
-    return Token{TokenKind::Number, start, length, value};
+    return Token{ TokenKind::Number, start, length, value };
 }
 
 Token Lexer::ScanIdentifier() noexcept {
@@ -226,7 +223,7 @@ Token Lexer::ScanIdentifier() noexcept {
     while(position_ < text_.size() && IsIdentifierPart(text_[position_])) {
         ++position_;
     }
-    return Token{TokenKind::Identifier, start, static_cast<std::uint16_t>(position_ - start), 0.0f};
+    return Token{ TokenKind::Identifier, start, static_cast<std::uint16_t>(position_ - start), 0.0f };
 }
 
 } // namespace eerie_leap::expression_engine::detail

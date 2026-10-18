@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
         return 2;
     }
 
-    const std::string_view text{argv[1]};
+    const std::string_view text{ argv[1] };
     std::vector<Binding> bindings;
     for(int i = 2; i < argc; ++i) {
         Binding binding{};
@@ -53,15 +53,9 @@ int main(int argc, char** argv) {
     if(!program) {
         const ee::CompileError& error = program.error();
         std::fprintf(
-            stderr,
-            "error: %.*s at %u\n%.*s\n%*s^\n",
-            static_cast<int>(ee::Describe(error.code).size()),
-            ee::Describe(error.code).data(),
-            static_cast<unsigned>(error.position),
-            static_cast<int>(text.size()),
-            text.data(),
-            static_cast<int>(error.position),
-            ""
+            stderr, "error: %.*s at %u\n%.*s\n%*s^\n", static_cast<int>(ee::Describe(error.code).size()),
+            ee::Describe(error.code).data(), static_cast<unsigned>(error.position), static_cast<int>(text.size()),
+            text.data(), static_cast<int>(error.position), ""
         );
         return 1;
     }

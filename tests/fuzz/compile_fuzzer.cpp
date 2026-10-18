@@ -15,7 +15,7 @@
 namespace ee = eerie_leap::expression_engine;
 
 extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t* data, std::size_t size) {
-    const std::string_view text{reinterpret_cast<const char*>(data), size};
+    const std::string_view text{ reinterpret_cast<const char*>(data), size };
 
     const auto program = ee::Compile(text);
     if(!program) {

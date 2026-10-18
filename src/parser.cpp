@@ -17,24 +17,24 @@ struct BinaryOperator {
     Op op;
 };
 
-constexpr std::array<BinaryOperator, 16> kBinaryOperators{{
-    {TokenKind::OrOr, 1, Op::OrJump},
-    {TokenKind::AndAnd, 2, Op::AndJump},
-    {TokenKind::Lt, 3, Op::Lt},
-    {TokenKind::Gt, 3, Op::Gt},
-    {TokenKind::Le, 3, Op::Le},
-    {TokenKind::Ge, 3, Op::Ge},
-    {TokenKind::Eq, 3, Op::Eq},
-    {TokenKind::Ne, 3, Op::Ne},
-    {TokenKind::Pipe, 4, Op::BitOr},
-    {TokenKind::Amp, 5, Op::BitAnd},
-    {TokenKind::Shl, 6, Op::Shl},
-    {TokenKind::Shr, 6, Op::Shr},
-    {TokenKind::Plus, 7, Op::Add},
-    {TokenKind::Minus, 7, Op::Sub},
-    {TokenKind::Star, 8, Op::Mul},
-    {TokenKind::Slash, 8, Op::Div},
-}};
+constexpr std::array<BinaryOperator, 16> kBinaryOperators{ {
+    { TokenKind::OrOr, 1, Op::OrJump },
+    { TokenKind::AndAnd, 2, Op::AndJump },
+    { TokenKind::Lt, 3, Op::Lt },
+    { TokenKind::Gt, 3, Op::Gt },
+    { TokenKind::Le, 3, Op::Le },
+    { TokenKind::Ge, 3, Op::Ge },
+    { TokenKind::Eq, 3, Op::Eq },
+    { TokenKind::Ne, 3, Op::Ne },
+    { TokenKind::Pipe, 4, Op::BitOr },
+    { TokenKind::Amp, 5, Op::BitAnd },
+    { TokenKind::Shl, 6, Op::Shl },
+    { TokenKind::Shr, 6, Op::Shr },
+    { TokenKind::Plus, 7, Op::Add },
+    { TokenKind::Minus, 7, Op::Sub },
+    { TokenKind::Star, 8, Op::Mul },
+    { TokenKind::Slash, 8, Op::Div },
+} };
 
 constexpr const BinaryOperator* FindBinary(TokenKind kind) noexcept {
     for(const BinaryOperator& spec : kBinaryOperators) {
@@ -46,7 +46,7 @@ constexpr const BinaryOperator* FindBinary(TokenKind kind) noexcept {
 }
 
 constexpr CompileError At(CompileErrorCode code, const Token& token) noexcept {
-    return CompileError{code, token.position, token.length};
+    return CompileError{ code, token.position, token.length };
 }
 
 // Attaches the position of `token` to an emitter failure.
@@ -59,8 +59,10 @@ constexpr Parser::Result Lift(std::expected<void, CompileErrorCode> result, cons
 
 } // namespace
 
-Parser::Parser(Lexer& lexer, Emitter& emitter, const Limits& limits) noexcept
-    : lexer_(lexer), emitter_(emitter), limits_(limits) {}
+Parser::Parser(Lexer& lexer, Emitter& emitter, const Limits& limits) noexcept :
+    lexer_(lexer),
+    emitter_(emitter),
+    limits_(limits) {}
 
 Parser::Result Parser::Enter(const Token& at) noexcept {
     if(depth_ >= limits_.max_nesting) {
@@ -124,10 +126,9 @@ Parser::Result Parser::ParseTernary() noexcept {
         return std::unexpected(colon.error());
     }
     if(colon->kind != TokenKind::Colon) {
-        return std::unexpected(
-            At(colon->kind == TokenKind::End ? CompileErrorCode::UnexpectedEnd : CompileErrorCode::UnexpectedToken,
-               *colon)
-        );
+        return std::unexpected(At(
+            colon->kind == TokenKind::End ? CompileErrorCode::UnexpectedEnd : CompileErrorCode::UnexpectedToken, *colon
+        ));
     }
 
     const auto skip_false = emitter_.EmitJump(Op::Jump);
@@ -215,12 +216,12 @@ Parser::Result Parser::ParseUnary() noexcept {
     Leave();
 
     switch(token->kind) {
-    case TokenKind::Minus:
-        return Lift(emitter_.EmitUnary(Op::Neg), *token);
-    case TokenKind::Tilde:
-        return Lift(emitter_.EmitUnary(Op::BitNot), *token);
-    default:
-        return {};
+        case TokenKind::Minus:
+            return Lift(emitter_.EmitUnary(Op::Neg), *token);
+        case TokenKind::Tilde:
+            return Lift(emitter_.EmitUnary(Op::BitNot), *token);
+        default:
+            return {};
     }
 }
 
@@ -257,54 +258,54 @@ Parser::Result Parser::ParsePrimary() noexcept {
     }
 
     switch(token->kind) {
-    case TokenKind::Number:
-        return Lift(emitter_.EmitConst(token->value), *token);
+        case TokenKind::Number:
+            return Lift(emitter_.EmitConst(token->value), *token);
 
-    case TokenKind::Identifier: {
-        const auto next = lexer_.Peek();
-        if(!next) {
-            return std::unexpected(next.error());
-        }
-        if(next->kind == TokenKind::LParen) {
-            return ParseCall(*token);
+        case TokenKind::Identifier: {
+            const auto next = lexer_.Peek();
+            if(!next) {
+                return std::unexpected(next.error());
+            }
+            if(next->kind == TokenKind::LParen) {
+                return ParseCall(*token);
+            }
+
+            const std::string_view name = lexer_.Text(*token);
+            if(name == "_pi") {
+                return Lift(emitter_.EmitConst(std::numbers::pi_v<Value>), *token);
+            }
+            if(name == "_e") {
+                return Lift(emitter_.EmitConst(std::numbers::e_v<Value>), *token);
+            }
+            return Lift(emitter_.EmitVariable(name), *token);
         }
 
-        const std::string_view name = lexer_.Text(*token);
-        if(name == "_pi") {
-            return Lift(emitter_.EmitConst(std::numbers::pi_v<Value>), *token);
+        case TokenKind::LParen: {
+            if(const auto r = Enter(*token); !r) {
+                return r;
+            }
+            if(const auto r = ParseTernary(); !r) {
+                return r;
+            }
+            const auto close = lexer_.Next();
+            if(!close) {
+                return std::unexpected(close.error());
+            }
+            if(close->kind == TokenKind::End) {
+                return std::unexpected(At(CompileErrorCode::UnbalancedParenthesis, *token));
+            }
+            if(close->kind != TokenKind::RParen) {
+                return std::unexpected(At(CompileErrorCode::UnexpectedToken, *close));
+            }
+            Leave();
+            return {};
         }
-        if(name == "_e") {
-            return Lift(emitter_.EmitConst(std::numbers::e_v<Value>), *token);
-        }
-        return Lift(emitter_.EmitVariable(name), *token);
-    }
 
-    case TokenKind::LParen: {
-        if(const auto r = Enter(*token); !r) {
-            return r;
-        }
-        if(const auto r = ParseTernary(); !r) {
-            return r;
-        }
-        const auto close = lexer_.Next();
-        if(!close) {
-            return std::unexpected(close.error());
-        }
-        if(close->kind == TokenKind::End) {
-            return std::unexpected(At(CompileErrorCode::UnbalancedParenthesis, *token));
-        }
-        if(close->kind != TokenKind::RParen) {
-            return std::unexpected(At(CompileErrorCode::UnexpectedToken, *close));
-        }
-        Leave();
-        return {};
-    }
+        case TokenKind::End:
+            return std::unexpected(At(CompileErrorCode::UnexpectedEnd, *token));
 
-    case TokenKind::End:
-        return std::unexpected(At(CompileErrorCode::UnexpectedEnd, *token));
-
-    default:
-        return std::unexpected(At(CompileErrorCode::UnexpectedToken, *token));
+        default:
+            return std::unexpected(At(CompileErrorCode::UnexpectedToken, *token));
     }
 }
 

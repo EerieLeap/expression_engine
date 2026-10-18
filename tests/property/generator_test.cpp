@@ -16,14 +16,16 @@ namespace eerie_leap::expression_engine {
 namespace {
 
 bool IsLimitError(CompileErrorCode code) {
-    return code == CompileErrorCode::TooLong || code == CompileErrorCode::TooManyInstructions ||
-           code == CompileErrorCode::StackTooDeep || code == CompileErrorCode::NestingTooDeep;
+    return code == CompileErrorCode::TooLong
+        || code == CompileErrorCode::TooManyInstructions
+        || code == CompileErrorCode::StackTooDeep
+        || code == CompileErrorCode::NestingTooDeep;
 }
 
 } // namespace
 
 TEST(Generator, BothRenderingsEvaluateToTheGeneratedValue) {
-    const testing::Binding bindings[]{{"x", 2.5f}, {"y", -1.25f}, {"z", 7.0f}, {"w", 0.0f}};
+    const testing::Binding bindings[]{ { "x", 2.5f }, { "y", -1.25f }, { "z", 7.0f }, { "w", 0.0f } };
     testing::ExpressionGenerator generator(12345, bindings);
 
     std::size_t total = 0;
@@ -31,7 +33,7 @@ TEST(Generator, BothRenderingsEvaluateToTheGeneratedValue) {
     for(int i = 0; i < 3000; ++i) {
         const testing::GeneratedExpression expression = generator.Generate(3 + (i % 2));
 
-        for(const std::string* text : {&expression.full, &expression.minimal}) {
+        for(const std::string* text : { &expression.full, &expression.minimal }) {
             ++total;
             const auto program = Compile(*text);
             if(!program) {

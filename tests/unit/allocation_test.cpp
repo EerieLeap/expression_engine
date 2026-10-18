@@ -19,12 +19,12 @@ TEST(Allocation, CompileAllocatesOnceForCodeOnceForNamesAndOnceForLongSymbols) {
         std::size_t allocations;
     };
     const Case cases[]{
-        {"2 * 3", 1},               // code
-        {"x", 2},                   // code + names; "x" fits the small-string buffer
-        {"x * 4 + 1.6", 2},         //
-        {"sensor_1 + 8.34", 2},     // 8 characters still fit
-        {"sensor_1 + sensor_2", 3}, // 16 characters do not
-        {"sensor_1 + sensor_2 * sensor_3", 3},
+        { "2 * 3", 1 },               // code
+        { "x", 2 },                   // code + names; "x" fits the small-string buffer
+        { "x * 4 + 1.6", 2 },         //
+        { "sensor_1 + 8.34", 2 },     // 8 characters still fit
+        { "sensor_1 + sensor_2", 3 }, // 16 characters do not
+        { "sensor_1 + sensor_2 * sensor_3", 3 },
     };
     for(const Case& c : cases) {
         testing::CountingResource resource;
@@ -55,7 +55,7 @@ TEST(Allocation, FailedCompilationDoesNotAllocate) {
 TEST(Allocation, EvaluateDoesNotAllocate) {
     const auto program = Compile("sum(x, y, z) * atan2(x, y) + (x > y ? x & 0xFF : ~y) + sqrt(z)");
     ASSERT_TRUE(program);
-    const std::array<Value, 3> variables{2.0f, 3.0f, 4.0f};
+    const std::array<Value, 3> variables{ 2.0f, 3.0f, 4.0f };
     (void)program->Evaluate(variables);
 
     const std::size_t before = testing::GlobalAllocations();
@@ -72,7 +72,9 @@ TEST(Allocation, DisassembleDoesNotAllocate) {
     ASSERT_TRUE(program);
     const std::size_t before = testing::GlobalAllocations();
     std::size_t characters = 0;
-    Disassemble(*program, [&characters](std::string_view line) { characters += line.size(); });
+    Disassemble(*program, [&characters](std::string_view line) {
+        characters += line.size();
+    });
     EXPECT_EQ(testing::GlobalAllocations(), before);
     EXPECT_GT(characters, 0u);
 }

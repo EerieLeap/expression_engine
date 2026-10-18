@@ -10,7 +10,8 @@ namespace eerie_leap::expression_engine::testing {
 // Counts the allocations made through it; optionally fails every allocation.
 class CountingResource final : public std::pmr::memory_resource {
 public:
-    explicit CountingResource(bool fail = false) noexcept : fail_(fail) {}
+    explicit CountingResource(bool fail = false) noexcept :
+        fail_(fail) {}
 
     [[nodiscard]] std::size_t Allocations() const noexcept {
         return allocations_;
