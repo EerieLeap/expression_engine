@@ -109,7 +109,7 @@ static_assert(detail::IdsMatchIndices(), "FunctionId enumerates kFunctions in or
 
 // nullptr when the name is not a function.
 [[nodiscard]] constexpr const FunctionSpec* FindFunction(std::string_view name) noexcept {
-    const auto it = std::ranges::lower_bound(kFunctions, name, {}, &FunctionSpec::name);
+    const auto* const it = std::ranges::lower_bound(kFunctions, name, {}, &FunctionSpec::name);
     return it != kFunctions.end() && it->name == name ? &*it : nullptr;
 }
 

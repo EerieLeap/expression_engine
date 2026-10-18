@@ -32,7 +32,7 @@ bool ParseBinding(std::string_view argument, Binding& binding) {
 
 } // namespace
 
-int main(int argc, char** argv) {
+int main(int argc, char* const* argv) {
     if(argc < 2) {
         std::fputs("usage: expr_cli <expression> [name=value ...]\n", stderr);
         return 2;
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
         std::printf("%.*s\n", static_cast<int>(line.size()), line.data());
     });
 
-    std::vector<ee::Value> variables(program->VariableCount(), 0.0f);
+    std::vector<ee::Value> variables(program->VariableCount(), 0.0F);
     for(std::size_t index = 0; index < program->VariableCount(); ++index) {
         const std::string_view name = program->VariableName(index);
         bool bound = false;

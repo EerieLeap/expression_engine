@@ -31,7 +31,7 @@ std::string Literal(Value value) {
     }
     std::array<char, 32> digits{};
     const auto [end, ec] = std::to_chars(digits.data(), digits.data() + digits.size(), value);
-    std::string text(digits.data(), static_cast<std::size_t>(end - digits.data()));
+    const std::string text(digits.data(), static_cast<std::size_t>(end - digits.data()));
     return value < 0 ? "(" + text + ")" : text;
 }
 
@@ -99,7 +99,7 @@ TEST(Functions, VectorsFoldedAtCompileTimeAndEvaluatedAtRunTime) {
         const std::string folded_text = Call(vector.name, literals);
         const auto folded = Compile(folded_text);
         ASSERT_TRUE(folded) << folded_text << ": " << Name(folded.error().code);
-        EXPECT_EQ(folded->Code().size(), 2u) << folded_text << " was not folded:\n" << testing::Listing(*folded);
+        EXPECT_EQ(folded->Code().size(), 2U) << folded_text << " was not folded:\n" << testing::Listing(*folded);
         const Value folded_value = folded->Evaluate({});
         EXPECT_TRUE(testing::WithinUlps(vector.expected, folded_value, vector.ulps))
             << folded_text << " = " << folded_value << ", expected " << vector.expected;
@@ -135,7 +135,7 @@ TEST(Functions, ArgumentCountBoundaries) {
 }
 
 TEST(Functions, OneArgumentFormulasMatchTheDocumentation) {
-    const Value samples[]{ -2.5f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, 2.5f, 10.0f, testing::kNaN, testing::kInf };
+    const Value samples[]{ -2.5F, -1.0F, -0.5F, 0.0F, 0.5F, 1.0F, 2.5F, 10.0F, testing::kNaN, testing::kInf };
     for(const Value v : samples) {
         const auto Check = [v](FunctionId id, Value expected) {
             const Value actual = Invoke(id, std::span<const Value>{ &v, 1 });
@@ -154,9 +154,9 @@ TEST(Functions, OneArgumentFormulasMatchTheDocumentation) {
         Check(FunctionId::Ln, std::log(v));
         Check(FunctionId::Log, std::log(v));
         Check(FunctionId::Log10, std::log10(v));
-        Check(FunctionId::Log2, std::log(v) / std::log(2.0f));
-        Check(FunctionId::Rint, std::floor(v + 0.5f));
-        Check(FunctionId::Sign, v < 0.0f ? -1.0f : (v > 0.0f ? 1.0f : 0.0f));
+        Check(FunctionId::Log2, std::log(v) / std::log(2.0F));
+        Check(FunctionId::Rint, std::floor(v + 0.5F));
+        Check(FunctionId::Sign, v < 0.0F ? -1.0F : (v > 0.0F ? 1.0F : 0.0F));
         Check(FunctionId::Sin, std::sin(v));
         Check(FunctionId::Sinh, std::sinh(v));
         Check(FunctionId::Sqrt, std::sqrt(v));
@@ -166,23 +166,23 @@ TEST(Functions, OneArgumentFormulasMatchTheDocumentation) {
 }
 
 TEST(Functions, VariadicFormulasFoldFromTheFirstArgument) {
-    const std::array<Value, 3> values{ 3.0f, 1.0f, 2.0f };
-    EXPECT_EQ(Invoke(FunctionId::Sum, values), 6.0f);
-    EXPECT_EQ(Invoke(FunctionId::Avg, values), 2.0f);
-    EXPECT_EQ(Invoke(FunctionId::Min, values), 1.0f);
-    EXPECT_EQ(Invoke(FunctionId::Max, values), 3.0f);
+    const std::array<Value, 3> values{ 3.0F, 1.0F, 2.0F };
+    EXPECT_EQ(Invoke(FunctionId::Sum, values), 6.0F);
+    EXPECT_EQ(Invoke(FunctionId::Avg, values), 2.0F);
+    EXPECT_EQ(Invoke(FunctionId::Min, values), 1.0F);
+    EXPECT_EQ(Invoke(FunctionId::Max, values), 3.0F);
 
     // std::min / std::max fold from the first argument, so a leading NaN wins and a later one loses.
-    const std::array<Value, 2> nan_first{ testing::kNaN, 1.0f };
-    const std::array<Value, 2> nan_last{ 1.0f, testing::kNaN };
+    const std::array<Value, 2> nan_first{ testing::kNaN, 1.0F };
+    const std::array<Value, 2> nan_last{ 1.0F, testing::kNaN };
     EXPECT_TRUE(std::isnan(Invoke(FunctionId::Min, nan_first)));
-    EXPECT_EQ(Invoke(FunctionId::Min, nan_last), 1.0f);
+    EXPECT_EQ(Invoke(FunctionId::Min, nan_last), 1.0F);
     EXPECT_TRUE(std::isnan(Invoke(FunctionId::Max, nan_first)));
-    EXPECT_EQ(Invoke(FunctionId::Max, nan_last), 1.0f);
+    EXPECT_EQ(Invoke(FunctionId::Max, nan_last), 1.0F);
 
-    const std::array<Value, 2> pair{ 1.0f, 2.0f };
-    EXPECT_EQ(Invoke(FunctionId::Atan2, pair), std::atan2(1.0f, 2.0f));
-    EXPECT_EQ(Invoke(FunctionId::Xor, pair), 3.0f);
+    const std::array<Value, 2> pair{ 1.0F, 2.0F };
+    EXPECT_EQ(Invoke(FunctionId::Atan2, pair), std::atan2(1.0F, 2.0F));
+    EXPECT_EQ(Invoke(FunctionId::Xor, pair), 3.0F);
 }
 
 } // namespace eerie_leap::expression_engine

@@ -36,7 +36,7 @@ Compile(std::string_view text, std::pmr::memory_resource* resource, const Limits
     }
 
     // The only allocations of a compilation: the code, the name table and the symbols.
-    const auto build = [&]() -> Program {
+    const auto build = [&] -> Program {
         Program program{ Program::allocator_type{ resource } };
 
         const auto code = emitter.Code();

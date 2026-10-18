@@ -81,22 +81,22 @@ private:
     };
 
     static constexpr std::array<ConstantSpec, 16> kConstants{ {
-        { "0", 0.0f },
-        { "1", 1.0f },
-        { "2", 2.0f },
-        { "3", 3.0f },
-        { "4", 4.0f },
-        { "7", 7.0f },
-        { "10", 10.0f },
-        { "255", 255.0f },
-        { "0.5", 0.5f },
-        { "1.5", 1.5f },
-        { "2.5", 2.5f },
-        { "0.1", 0.1f },
-        { "1e3", 1000.0f },
-        { "0xFF", 255.0f },
-        { "0x10", 16.0f },
-        { "0b101", 5.0f },
+        { "0", 0.0F },
+        { "1", 1.0F },
+        { "2", 2.0F },
+        { "3", 3.0F },
+        { "4", 4.0F },
+        { "7", 7.0F },
+        { "10", 10.0F },
+        { "255", 255.0F },
+        { "0.5", 0.5F },
+        { "1.5", 1.5F },
+        { "2.5", 2.5F },
+        { "0.1", 0.1F },
+        { "1e3", 1000.0F },
+        { "0xFF", 255.0F },
+        { "0x10", 16.0F },
+        { "0b101", 5.0F },
     } };
 
     static constexpr std::array<OperatorSpec, 17> kOperators{ {
@@ -129,28 +129,28 @@ private:
 
     static Value Apply(std::string_view op, Value a, Value b) {
         if(op == "||") {
-            return (a != 0.0f || b != 0.0f) ? 1.0f : 0.0f;
+            return (a != 0.0F || b != 0.0F) ? 1.0F : 0.0F;
         }
         if(op == "&&") {
-            return (a != 0.0f && b != 0.0f) ? 1.0f : 0.0f;
+            return (a != 0.0F && b != 0.0F) ? 1.0F : 0.0F;
         }
         if(op == "<") {
-            return a < b ? 1.0f : 0.0f;
+            return a < b ? 1.0F : 0.0F;
         }
         if(op == ">") {
-            return a > b ? 1.0f : 0.0f;
+            return a > b ? 1.0F : 0.0F;
         }
         if(op == "<=") {
-            return a <= b ? 1.0f : 0.0f;
+            return a <= b ? 1.0F : 0.0F;
         }
         if(op == ">=") {
-            return a >= b ? 1.0f : 0.0f;
+            return a >= b ? 1.0F : 0.0F;
         }
         if(op == "==") {
-            return a == b ? 1.0f : 0.0f;
+            return a == b ? 1.0F : 0.0F;
         }
         if(op == "!=") {
-            return a != b ? 1.0f : 0.0f;
+            return a != b ? 1.0F : 0.0F;
         }
         if(op == "|") {
             return detail::BitOr(a, b);
@@ -222,7 +222,7 @@ private:
         const GeneratedExpression condition = Generate(depth - 1);
         const GeneratedExpression when_true = Generate(depth - 1);
         const GeneratedExpression when_false = Generate(depth - 1);
-        const Value value = condition.value != 0.0f ? when_true.value : when_false.value;
+        const Value value = condition.value != 0.0F ? when_true.value : when_false.value;
         // Only a ternary condition needs parentheses; both branches take any expression.
         const std::string condition_minimal = condition.precedence < kOr ? Wrap(condition.minimal) : condition.minimal;
         return { Wrap(condition.full + " ? " + when_true.full + " : " + when_false.full),

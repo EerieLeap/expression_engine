@@ -31,7 +31,7 @@ Value Invoke(FunctionId id, std::span<const Value> args) noexcept {
         case FunctionId::Atanh:
             return std::atanh(args[0]);
         case FunctionId::Avg: {
-            Value sum = 0.0f;
+            Value sum = 0.0F;
             for(const Value arg : args) {
                 sum += arg;
             }
@@ -49,7 +49,7 @@ Value Invoke(FunctionId id, std::span<const Value> args) noexcept {
         case FunctionId::Log10:
             return std::log10(args[0]);
         case FunctionId::Log2:
-            return std::log(args[0]) / std::log(2.0f);
+            return std::log(args[0]) / std::log(2.0F);
         case FunctionId::Max: {
             Value result = args[0];
             for(const Value arg : args) {
@@ -65,9 +65,9 @@ Value Invoke(FunctionId id, std::span<const Value> args) noexcept {
             return result;
         }
         case FunctionId::Rint:
-            return std::floor(args[0] + 0.5f);
+            return std::floor(args[0] + 0.5F);
         case FunctionId::Sign:
-            return args[0] < 0.0f ? -1.0f : (args[0] > 0.0f ? 1.0f : 0.0f);
+            return args[0] < 0.0F ? -1.0F : (args[0] > 0.0F ? 1.0F : 0.0F);
         case FunctionId::Sin:
             return std::sin(args[0]);
         case FunctionId::Sinh:
@@ -75,7 +75,7 @@ Value Invoke(FunctionId id, std::span<const Value> args) noexcept {
         case FunctionId::Sqrt:
             return std::sqrt(args[0]);
         case FunctionId::Sum: {
-            Value sum = 0.0f;
+            Value sum = 0.0F;
             for(const Value arg : args) {
                 sum += arg;
             }

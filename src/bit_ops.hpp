@@ -15,7 +15,7 @@ namespace eerie_leap::expression_engine::detail {
 // wrap modulo 2^32 and the result is read as two's complement.
 [[nodiscard]] inline std::int32_t ToInt32(Value v) noexcept {
     // A float of magnitude 2^63 or more has zeros in its low 32 bits, so 0 is also the wrapped value.
-    if(!std::isfinite(v) || std::fabs(v) >= 9223372036854775808.0f) {
+    if(!std::isfinite(v) || std::fabs(v) >= 9223372036854775808.0F) {
         return 0;
     }
     return std::bit_cast<std::int32_t>(static_cast<std::uint32_t>(static_cast<std::int64_t>(v)));
@@ -45,7 +45,7 @@ namespace eerie_leap::expression_engine::detail {
 [[nodiscard]] inline Value Shl(Value a, Value n) noexcept {
     const std::int32_t count = ToInt32(n);
     if(count < 0 || count > 31) {
-        return 0.0f;
+        return 0.0F;
     }
     const auto pattern = static_cast<std::uint32_t>(ToInt32(a)) << count;
     return FromInt32(std::bit_cast<std::int32_t>(pattern));
@@ -55,7 +55,7 @@ namespace eerie_leap::expression_engine::detail {
 [[nodiscard]] inline Value Shr(Value a, Value n) noexcept {
     const std::int32_t count = ToInt32(n);
     if(count < 0 || count > 31) {
-        return 0.0f;
+        return 0.0F;
     }
     return FromInt32(ToInt32(a) >> count);
 }

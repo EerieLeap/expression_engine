@@ -67,13 +67,13 @@ char Lexer::At(std::size_t offset) const noexcept {
 }
 
 Token Lexer::Single(TokenKind kind) noexcept {
-    const Token token{ kind, position_, 1, 0.0f };
+    const Token token{ kind, position_, 1, 0.0F };
     ++position_;
     return token;
 }
 
 Token Lexer::Double(TokenKind kind) noexcept {
-    const Token token{ kind, position_, 2, 0.0f };
+    const Token token{ kind, position_, 2, 0.0F };
     position_ = static_cast<Position>(position_ + 2);
     return token;
 }
@@ -84,7 +84,7 @@ std::expected<Token, CompileError> Lexer::Scan() noexcept {
     }
 
     if(position_ >= text_.size()) {
-        return Token{ TokenKind::End, position_, 0, 0.0f };
+        return Token{ TokenKind::End, position_, 0, 0.0F };
     }
 
     const char c = text_[position_];
@@ -175,7 +175,7 @@ std::expected<Token, CompileError> Lexer::ScanNumber() noexcept {
 
     const char* const begin = text_.data() + start;
     const char* const end = text_.data() + text_.size();
-    Value value = 0.0f;
+    Value value = 0.0F;
     const auto [ptr, ec] = std::from_chars(begin, end, value, std::chars_format::general);
     const auto length = static_cast<std::uint16_t>(ptr - begin);
 
@@ -223,7 +223,7 @@ Token Lexer::ScanIdentifier() noexcept {
     while(position_ < text_.size() && IsIdentifierPart(text_[position_])) {
         ++position_;
     }
-    return Token{ TokenKind::Identifier, start, static_cast<std::uint16_t>(position_ - start), 0.0f };
+    return Token{ TokenKind::Identifier, start, static_cast<std::uint16_t>(position_ - start), 0.0F };
 }
 
 } // namespace eerie_leap::expression_engine::detail

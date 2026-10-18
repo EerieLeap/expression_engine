@@ -122,7 +122,7 @@ TEST(Compiler, StackTooDeepAtTheCap) {
 }
 
 TEST(Compiler, HonoursLoweredLimits) {
-    const auto resource = std::pmr::get_default_resource();
+    auto* const resource = std::pmr::get_default_resource();
 
     EXPECT_TRUE(Compile("x * 4", resource, { .max_instructions = 4 }));
     auto program = Compile("x * 4 + 1.6", resource, { .max_instructions = 4 });
@@ -170,8 +170,8 @@ TEST(Compiler, UsesOnlyTheGivenResource) {
         const auto program = Compile("x * 4 + 1.6", &resource);
         ASSERT_TRUE(program);
         EXPECT_EQ(program->get_allocator().resource(), &resource);
-        EXPECT_GE(resource.Allocations(), 1u);
-        EXPECT_LE(resource.Allocations(), 3u);
+        EXPECT_GE(resource.Allocations(), 1U);
+        EXPECT_LE(resource.Allocations(), 3U);
     }
     EXPECT_EQ(resource.Deallocations(), resource.Allocations());
 }
@@ -190,11 +190,11 @@ TEST(Compiler, ProgramOwnsItsVariableNames) {
 TEST(Compiler, NumbersVariablesInOrderOfFirstAppearance) {
     const auto program = Compile("b + a + b");
     ASSERT_TRUE(program);
-    EXPECT_EQ(program->VariableCount(), 2u);
+    EXPECT_EQ(program->VariableCount(), 2U);
     EXPECT_EQ(program->VariableName(0), "b");
     EXPECT_EQ(program->VariableName(1), "a");
-    EXPECT_EQ(program->VariableIndex("a"), 1u);
-    EXPECT_EQ(program->VariableIndex("b"), 0u);
+    EXPECT_EQ(program->VariableIndex("a"), 1U);
+    EXPECT_EQ(program->VariableIndex("b"), 0U);
     EXPECT_EQ(program->VariableIndex("x"), std::nullopt);
 
     std::vector<std::string_view> names;
@@ -221,7 +221,7 @@ TEST(Compiler, ReportsExactMaxStackDepth) {
 TEST(Compiler, IgnoresSurroundingWhitespace) {
     const auto program = Compile("  1\t+\n2  ");
     ASSERT_TRUE(program);
-    EXPECT_EQ(program->Evaluate({}), 3.0f);
+    EXPECT_EQ(program->Evaluate({}), 3.0F);
 }
 
 } // namespace eerie_leap::expression_engine

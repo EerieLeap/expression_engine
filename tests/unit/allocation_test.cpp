@@ -49,17 +49,17 @@ TEST(Allocation, FailedCompilationDoesNotAllocate) {
     const auto program = Compile("sensor_1 + * 2", &resource);
     EXPECT_FALSE(program);
     EXPECT_EQ(testing::GlobalAllocations(), before);
-    EXPECT_EQ(resource.Allocations(), 0u);
+    EXPECT_EQ(resource.Allocations(), 0U);
 }
 
 TEST(Allocation, EvaluateDoesNotAllocate) {
     const auto program = Compile("sum(x, y, z) * atan2(x, y) + (x > y ? x & 0xFF : ~y) + sqrt(z)");
     ASSERT_TRUE(program);
-    const std::array<Value, 3> variables{ 2.0f, 3.0f, 4.0f };
+    const std::array<Value, 3> variables{ 2.0F, 3.0F, 4.0F };
     (void)program->Evaluate(variables);
 
     const std::size_t before = testing::GlobalAllocations();
-    Value sink = 0.0f;
+    Value sink = 0.0F;
     for(int i = 0; i < 1000; ++i) {
         sink += program->Evaluate(variables);
     }
@@ -76,7 +76,7 @@ TEST(Allocation, DisassembleDoesNotAllocate) {
         characters += line.size();
     });
     EXPECT_EQ(testing::GlobalAllocations(), before);
-    EXPECT_GT(characters, 0u);
+    EXPECT_GT(characters, 0U);
 }
 
 } // namespace eerie_leap::expression_engine

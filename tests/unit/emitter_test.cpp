@@ -19,52 +19,52 @@ std::string_view Slice(std::size_t offset, std::size_t length) {
 
 TEST(Emitter, FoldsConstantBinaryOperation) {
     Emitter emitter(kText, Limits{});
-    ASSERT_TRUE(emitter.EmitConst(2.0f));
-    ASSERT_TRUE(emitter.EmitConst(3.0f));
+    ASSERT_TRUE(emitter.EmitConst(2.0F));
+    ASSERT_TRUE(emitter.EmitConst(3.0F));
     ASSERT_TRUE(emitter.EmitBinary(Op::Mul));
     EXPECT_TRUE(emitter.Code().empty());
     ASSERT_TRUE(emitter.EmitEnd());
 
     const auto code = emitter.Code();
-    ASSERT_EQ(code.size(), 2u);
+    ASSERT_EQ(code.size(), 2U);
     EXPECT_EQ(code[0].op, Op::PushConst);
-    EXPECT_EQ(code[0].imm, 6.0f);
+    EXPECT_EQ(code[0].imm, 6.0F);
     EXPECT_EQ(code[1].op, Op::End);
     EXPECT_EQ(emitter.MaxDepth(), 1);
 }
 
 TEST(Emitter, FoldsConstantUnaryOperation) {
     Emitter emitter(kText, Limits{});
-    ASSERT_TRUE(emitter.EmitConst(2.0f));
+    ASSERT_TRUE(emitter.EmitConst(2.0F));
     ASSERT_TRUE(emitter.EmitUnary(Op::Neg));
     ASSERT_TRUE(emitter.EmitUnary(Op::ToBool));
     ASSERT_TRUE(emitter.EmitEnd());
-    ASSERT_EQ(emitter.Code().size(), 2u);
-    EXPECT_EQ(emitter.Code()[0].imm, 1.0f);
+    ASSERT_EQ(emitter.Code().size(), 2U);
+    EXPECT_EQ(emitter.Code()[0].imm, 1.0F);
 }
 
 TEST(Emitter, FoldsCallWithConstantArguments) {
     Emitter emitter(kText, Limits{});
-    ASSERT_TRUE(emitter.EmitConst(1.0f));
-    ASSERT_TRUE(emitter.EmitConst(2.0f));
-    ASSERT_TRUE(emitter.EmitConst(3.0f));
+    ASSERT_TRUE(emitter.EmitConst(1.0F));
+    ASSERT_TRUE(emitter.EmitConst(2.0F));
+    ASSERT_TRUE(emitter.EmitConst(3.0F));
     ASSERT_TRUE(emitter.EmitCall(FunctionId::Sum, 3));
     ASSERT_TRUE(emitter.EmitEnd());
-    ASSERT_EQ(emitter.Code().size(), 2u);
-    EXPECT_EQ(emitter.Code()[0].imm, 6.0f);
+    ASSERT_EQ(emitter.Code().size(), 2U);
+    EXPECT_EQ(emitter.Code()[0].imm, 6.0F);
     EXPECT_EQ(emitter.MaxDepth(), 1);
 }
 
 TEST(Emitter, DoesNotFoldCallWithVariableArgument) {
     Emitter emitter(kText, Limits{});
-    ASSERT_TRUE(emitter.EmitConst(1.0f));
+    ASSERT_TRUE(emitter.EmitConst(1.0F));
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
-    ASSERT_TRUE(emitter.EmitConst(2.0f));
+    ASSERT_TRUE(emitter.EmitConst(2.0F));
     ASSERT_TRUE(emitter.EmitCall(FunctionId::Sum, 3));
     ASSERT_TRUE(emitter.EmitEnd());
 
     const auto code = emitter.Code();
-    ASSERT_EQ(code.size(), 5u);
+    ASSERT_EQ(code.size(), 5U);
     EXPECT_EQ(code[0].op, Op::PushConst);
     EXPECT_EQ(code[1].op, Op::PushVar);
     EXPECT_EQ(code[2].op, Op::PushConst);
@@ -76,17 +76,17 @@ TEST(Emitter, DoesNotFoldCallWithVariableArgument) {
 
 TEST(Emitter, FlushesPendingConstantsInOrderBeforeAVariable) {
     Emitter emitter(kText, Limits{});
-    ASSERT_TRUE(emitter.EmitConst(1.0f));
-    ASSERT_TRUE(emitter.EmitConst(2.0f));
+    ASSERT_TRUE(emitter.EmitConst(1.0F));
+    ASSERT_TRUE(emitter.EmitConst(2.0F));
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
     ASSERT_TRUE(emitter.EmitBinary(Op::Mul));
     ASSERT_TRUE(emitter.EmitBinary(Op::Add));
     ASSERT_TRUE(emitter.EmitEnd());
 
     const auto code = emitter.Code();
-    ASSERT_EQ(code.size(), 6u);
-    EXPECT_EQ(code[0].imm, 1.0f);
-    EXPECT_EQ(code[1].imm, 2.0f);
+    ASSERT_EQ(code.size(), 6U);
+    EXPECT_EQ(code[0].imm, 1.0F);
+    EXPECT_EQ(code[1].imm, 2.0F);
     EXPECT_EQ(code[2].op, Op::PushVar);
     EXPECT_EQ(code[3].op, Op::Mul);
     EXPECT_EQ(code[4].op, Op::Add);
@@ -103,7 +103,7 @@ TEST(Emitter, InternsVariableNames) {
     ASSERT_TRUE(emitter.EmitVariable(Slice(12, 1))); // z
     ASSERT_TRUE(emitter.EmitBinary(Op::Add));
 
-    ASSERT_EQ(emitter.Names().size(), 3u);
+    ASSERT_EQ(emitter.Names().size(), 3U);
     EXPECT_EQ(emitter.Names()[0].offset, 0);
     EXPECT_EQ(emitter.Names()[1].offset, 4);
     EXPECT_EQ(emitter.Names()[2].offset, 12);
@@ -119,22 +119,22 @@ TEST(Emitter, PatchesTernaryJumpsAndRestoresDepth) {
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
     const auto skip_true = emitter.EmitJump(Op::JumpIfFalse);
     ASSERT_TRUE(skip_true);
-    ASSERT_TRUE(emitter.EmitConst(2.0f));
+    ASSERT_TRUE(emitter.EmitConst(2.0F));
     const auto skip_false = emitter.EmitJump(Op::Jump);
     ASSERT_TRUE(skip_false);
     ASSERT_TRUE(emitter.PatchJump(*skip_true));
-    ASSERT_TRUE(emitter.EmitConst(3.0f));
+    ASSERT_TRUE(emitter.EmitConst(3.0F));
     ASSERT_TRUE(emitter.PatchJump(*skip_false));
     ASSERT_TRUE(emitter.EmitEnd());
 
     const auto code = emitter.Code();
-    ASSERT_EQ(code.size(), 6u);
+    ASSERT_EQ(code.size(), 6U);
     EXPECT_EQ(code[1].op, Op::JumpIfFalse);
     EXPECT_EQ(code[1].arg, 4);
-    EXPECT_EQ(code[2].imm, 2.0f);
+    EXPECT_EQ(code[2].imm, 2.0F);
     EXPECT_EQ(code[3].op, Op::Jump);
     EXPECT_EQ(code[3].arg, 5);
-    EXPECT_EQ(code[4].imm, 3.0f);
+    EXPECT_EQ(code[4].imm, 3.0F);
     EXPECT_EQ(code[5].op, Op::End);
     EXPECT_EQ(emitter.MaxDepth(), 1);
 }
@@ -142,23 +142,23 @@ TEST(Emitter, PatchesTernaryJumpsAndRestoresDepth) {
 TEST(Emitter, DoesNotFoldAcrossAJumpTarget) {
     // (0 ? 2 : 3) + 4: the 3 at the false label must not be folded with the 4.
     Emitter emitter(kText, Limits{});
-    ASSERT_TRUE(emitter.EmitConst(0.0f));
+    ASSERT_TRUE(emitter.EmitConst(0.0F));
     const auto skip_true = emitter.EmitJump(Op::JumpIfFalse);
     ASSERT_TRUE(skip_true);
-    ASSERT_TRUE(emitter.EmitConst(2.0f));
+    ASSERT_TRUE(emitter.EmitConst(2.0F));
     const auto skip_false = emitter.EmitJump(Op::Jump);
     ASSERT_TRUE(skip_false);
     ASSERT_TRUE(emitter.PatchJump(*skip_true));
-    ASSERT_TRUE(emitter.EmitConst(3.0f));
+    ASSERT_TRUE(emitter.EmitConst(3.0F));
     ASSERT_TRUE(emitter.PatchJump(*skip_false));
-    ASSERT_TRUE(emitter.EmitConst(4.0f));
+    ASSERT_TRUE(emitter.EmitConst(4.0F));
     ASSERT_TRUE(emitter.EmitBinary(Op::Add));
     ASSERT_TRUE(emitter.EmitEnd());
 
     const auto code = emitter.Code();
-    ASSERT_EQ(code.size(), 8u);
-    EXPECT_EQ(code[4].imm, 3.0f);
-    EXPECT_EQ(code[5].imm, 4.0f);
+    ASSERT_EQ(code.size(), 8U);
+    EXPECT_EQ(code[4].imm, 3.0F);
+    EXPECT_EQ(code[5].imm, 4.0F);
     EXPECT_EQ(code[6].op, Op::Add);
     EXPECT_EQ(emitter.MaxDepth(), 2);
 }
@@ -175,7 +175,7 @@ TEST(Emitter, AndJumpArrivesWithTheResultOnTheStack) {
     ASSERT_TRUE(emitter.EmitEnd());
 
     const auto code = emitter.Code();
-    ASSERT_EQ(code.size(), 5u);
+    ASSERT_EQ(code.size(), 5U);
     EXPECT_EQ(code[1].op, Op::AndJump);
     EXPECT_EQ(code[1].arg, 4);
     EXPECT_EQ(code[3].op, Op::ToBool);
@@ -203,14 +203,14 @@ TEST(Emitter, ReportsStackTooDeepForMaterializedValuesOnly) {
     // Pending constants never touch the evaluation stack.
     Emitter folding(kText, Limits{ .max_stack = 1 });
     for(int i = 0; i < 5; ++i) {
-        ASSERT_TRUE(folding.EmitConst(1.0f));
+        ASSERT_TRUE(folding.EmitConst(1.0F));
     }
     for(int i = 0; i < 4; ++i) {
         ASSERT_TRUE(folding.EmitBinary(Op::Add));
     }
     ASSERT_TRUE(folding.EmitEnd());
     EXPECT_EQ(folding.MaxDepth(), 1);
-    EXPECT_EQ(folding.Code()[0].imm, 5.0f);
+    EXPECT_EQ(folding.Code()[0].imm, 5.0F);
 }
 
 TEST(Emitter, ReportsTooManyVariables) {
