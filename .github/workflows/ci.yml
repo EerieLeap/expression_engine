@@ -79,24 +79,45 @@ jobs:
         run: |
           find include src tests examples -name '*.cpp' -o -name '*.hpp' | xargs clang-format --dry-run -Werror
 
-  tidy:
-    name: clang-tidy (advisory)
+  clang-tidy:
+    name: clang-tidy 23
     runs-on: ubuntu-24.04
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ninja-build
-          wget -qO- https://apt.llvm.org/llvm.sh | sudo bash -s -- 19
-          sudo apt-get install -y --no-install-recommends clang-tidy-19
-      - name: Build with clang-tidy
-        env:
-          CXX: clang++-19
+          sudo apt-get install -y --no-install-recommends ninja-build gcc-14 g++-14
+      - name: Install clang-tidy 23
+        # The same major as the one the sources are checked with; apt.llvm.org pins the major only.
         run: |
-          cmake --preset tidy -DCMAKE_CXX_CLANG_TIDY=clang-tidy-19
-          cmake --build --preset tidy
+          sudo curl -fsSL -o /etc/apt/trusted.gpg.d/apt.llvm.org.asc https://apt.llvm.org/llvm-snapshot.gpg.key
+          echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-23 main" | sudo tee /etc/apt/sources.list.d/llvm-23.list
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-tools-23 clang-tidy-23
+      # The dev preset exports compile_commands.json into build/dev.
+      - name: Build
+        env:
+          CXX: g++-14
+        run: |
+          cmake --preset dev
+          cmake --build --preset dev
+      # Any warning in a pull request fails the job (-warnings-as-errors); other events only report,
+      # until every source is clean. Only the repository's own sources are linted, not _deps.
+      - name: Lint
+        continue-on-error: ${{ github.event_name != 'pull_request' }}
+        run: |
+          set -o pipefail
+          strict=()
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then strict=(-warnings-as-errors='*'); fi
+          run-clang-tidy-23 -p build/dev -quiet "${strict[@]}" "^$PWD/(include|src|tests|examples)/" 2>&1 | tee tidy-report.txt
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tidy-report
+          path: tidy-report.txt
+          if-no-files-found: ignore
 
   fuzz:
     name: libFuzzer smoke run
