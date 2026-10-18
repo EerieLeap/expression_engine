@@ -56,11 +56,11 @@ public:
     [[nodiscard]] Result EmitEnd() noexcept;
 
     [[nodiscard]] std::span<const Instruction> Code() const noexcept {
-        return std::span<const Instruction>{code_.data(), size_};
+        return std::span<const Instruction>{ code_.data(), size_ };
     }
 
     [[nodiscard]] std::span<const NameRef> Names() const noexcept {
-        return std::span<const NameRef>{names_.data(), name_count_};
+        return std::span<const NameRef>{ names_.data(), name_count_ };
     }
 
     [[nodiscard]] std::uint8_t MaxDepth() const noexcept {

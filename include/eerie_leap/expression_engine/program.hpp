@@ -20,11 +20,8 @@ namespace eerie_leap::expression_engine {
 
 class Program;
 
-[[nodiscard]] std::expected<Program, CompileError> Compile(
-    std::string_view text,
-    std::pmr::memory_resource* resource,
-    const Limits& limits
-) noexcept;
+[[nodiscard]] std::expected<Program, CompileError>
+Compile(std::string_view text, std::pmr::memory_resource* resource, const Limits& limits) noexcept;
 
 // A compiled expression: bytecode plus the names of the variables it reads, in index order.
 //
@@ -61,13 +58,14 @@ public:
     // index < VariableCount()
     [[nodiscard]] std::string_view VariableName(std::size_t index) const noexcept {
         const NameRef& ref = names_[index];
-        return std::string_view{symbols_}.substr(ref.offset, ref.length);
+        return std::string_view{ symbols_ }.substr(ref.offset, ref.length);
     }
 
     // The names in index order, as a range of std::string_view.
     [[nodiscard]] auto VariableNames() const noexcept {
-        return std::views::iota(std::size_t{0}, names_.size()) |
-               std::views::transform([this](std::size_t index) { return VariableName(index); });
+        return std::views::iota(std::size_t{ 0 }, names_.size()) | std::views::transform([this](std::size_t index) {
+            return VariableName(index);
+        });
     }
 
     [[nodiscard]] std::optional<std::size_t> VariableIndex(std::string_view name) const noexcept;
@@ -82,18 +80,18 @@ public:
     }
 
 private:
-    friend std::expected<Program, CompileError> Compile(
-        std::string_view text,
-        std::pmr::memory_resource* resource,
-        const Limits& limits
-    ) noexcept;
+    friend std::expected<Program, CompileError>
+    Compile(std::string_view text, std::pmr::memory_resource* resource, const Limits& limits) noexcept;
 
     struct NameRef {
         std::uint16_t offset; // into symbols_
         std::uint16_t length;
     };
 
-    explicit Program(allocator_type alloc) : code_(alloc), names_(alloc), symbols_(alloc) {}
+    explicit Program(allocator_type alloc) :
+        code_(alloc),
+        names_(alloc),
+        symbols_(alloc) {}
 
     std::pmr::vector<Instruction> code_; // exact size, ends with Op::End
     std::pmr::vector<NameRef> names_;    // one per variable index

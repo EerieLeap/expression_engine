@@ -9,7 +9,7 @@
 
 namespace {
 
-std::atomic<std::size_t> allocations{0};
+std::atomic<std::size_t> allocations{ 0 };
 
 void* Allocate(std::size_t size) {
     allocations.fetch_add(1, std::memory_order_relaxed);

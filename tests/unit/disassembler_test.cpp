@@ -71,7 +71,9 @@ TEST(Disassembler, CallsSinkOncePerInstruction) {
     const auto program = Compile("x * 4 + 1.6");
     ASSERT_TRUE(program);
     std::size_t lines = 0;
-    Disassemble(*program, [&lines](std::string_view) { ++lines; });
+    Disassemble(*program, [&lines](std::string_view) {
+        ++lines;
+    });
     EXPECT_EQ(lines, program->Code().size());
 }
 

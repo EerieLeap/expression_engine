@@ -10,20 +10,17 @@
 
 namespace eerie_leap::expression_engine {
 
-std::expected<Program, CompileError> Compile(
-    std::string_view text,
-    std::pmr::memory_resource* resource,
-    const Limits& requested
-) noexcept {
+std::expected<Program, CompileError>
+Compile(std::string_view text, std::pmr::memory_resource* resource, const Limits& requested) noexcept {
     const Limits limits = requested.Clamped();
 
     if(text.find_first_not_of(" \t\n\r\v\f") == std::string_view::npos) {
-        return std::unexpected(CompileError{CompileErrorCode::Empty, 0, 0});
+        return std::unexpected(CompileError{ CompileErrorCode::Empty, 0, 0 });
     }
     if(text.size() > limits.max_length) {
         const std::size_t excess = std::min<std::size_t>(text.size() - limits.max_length, 65535);
         return std::unexpected(
-            CompileError{CompileErrorCode::TooLong, limits.max_length, static_cast<std::uint16_t>(excess)}
+            CompileError{ CompileErrorCode::TooLong, limits.max_length, static_cast<std::uint16_t>(excess) }
         );
     }
 
@@ -35,12 +32,12 @@ std::expected<Program, CompileError> Compile(
         return std::unexpected(r.error());
     }
     if(const auto r = emitter.EmitEnd(); !r) {
-        return std::unexpected(CompileError{r.error(), static_cast<Position>(text.size()), 0});
+        return std::unexpected(CompileError{ r.error(), static_cast<Position>(text.size()), 0 });
     }
 
     // The only allocations of a compilation: the code, the name table and the symbols.
     const auto build = [&]() -> Program {
-        Program program{Program::allocator_type{resource}};
+        Program program{ Program::allocator_type{ resource } };
 
         const auto code = emitter.Code();
         program.code_.assign(code.begin(), code.end());
@@ -53,7 +50,9 @@ std::expected<Program, CompileError> Compile(
         program.names_.reserve(names.size());
         program.symbols_.reserve(symbols_size);
         for(const detail::NameRef& ref : names) {
-            program.names_.push_back(Program::NameRef{static_cast<std::uint16_t>(program.symbols_.size()), ref.length});
+            program.names_.push_back(
+                Program::NameRef{ static_cast<std::uint16_t>(program.symbols_.size()), ref.length }
+            );
             program.symbols_.append(text.substr(ref.offset, ref.length));
         }
 
@@ -65,7 +64,7 @@ std::expected<Program, CompileError> Compile(
     try {
         return build();
     } catch(...) {
-        return std::unexpected(CompileError{CompileErrorCode::OutOfMemory, 0, 0});
+        return std::unexpected(CompileError{ CompileErrorCode::OutOfMemory, 0, 0 });
     }
 #else
     return build();

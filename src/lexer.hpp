@@ -50,7 +50,8 @@ struct Token {
 // most 65535 bytes (Compile checks max_length first) so positions fit a Position.
 class Lexer {
 public:
-    explicit Lexer(std::string_view text) noexcept : text_(text) {}
+    explicit Lexer(std::string_view text) noexcept :
+        text_(text) {}
 
     // The next token without consuming it.
     [[nodiscard]] std::expected<Token, CompileError> Peek() noexcept;

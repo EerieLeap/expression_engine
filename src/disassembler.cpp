@@ -12,18 +12,42 @@ namespace eerie_leap::expression_engine {
 
 namespace {
 
-constexpr std::array<std::string_view, kOpCount> kOpNames{{
-    "PushConst", "PushVar", "Neg",     "Add",    "Sub",         "Mul",    "Div",   "Pow",    "Lt",
-    "Gt",        "Le",      "Ge",      "Eq",     "Ne",          "BitAnd", "BitOr", "BitNot", "Shl",
-    "Shr",       "ToBool",  "AndJump", "OrJump", "JumpIfFalse", "Jump",   "Call",  "End",
-}};
+constexpr std::array<std::string_view, kOpCount> kOpNames{ {
+    "PushConst",
+    "PushVar",
+    "Neg",
+    "Add",
+    "Sub",
+    "Mul",
+    "Div",
+    "Pow",
+    "Lt",
+    "Gt",
+    "Le",
+    "Ge",
+    "Eq",
+    "Ne",
+    "BitAnd",
+    "BitOr",
+    "BitNot",
+    "Shl",
+    "Shr",
+    "ToBool",
+    "AndJump",
+    "OrJump",
+    "JumpIfFalse",
+    "Jump",
+    "Call",
+    "End",
+} };
 
 constexpr std::size_t kOpColumnWidth = 11; // "JumpIfFalse"
 
 // Appends into a fixed buffer, silently truncating; the buffer is sized for the longest line.
 class LineWriter {
 public:
-    explicit LineWriter(std::span<char> buffer) noexcept : buffer_(buffer) {}
+    explicit LineWriter(std::span<char> buffer) noexcept :
+        buffer_(buffer) {}
 
     void Append(std::string_view text) noexcept {
         for(const char c : text) {
@@ -40,7 +64,7 @@ public:
         for(std::size_t i = length; i < width; ++i) {
             Append(" ");
         }
-        Append(std::string_view{digits.data(), length});
+        Append(std::string_view{ digits.data(), length });
     }
 
     void Append(Value value) noexcept {
@@ -50,7 +74,7 @@ public:
         }
         std::array<char, 32> digits{};
         const auto [end, ec] = std::to_chars(digits.data(), digits.data() + digits.size(), value);
-        Append(std::string_view{digits.data(), static_cast<std::size_t>(end - digits.data())});
+        Append(std::string_view{ digits.data(), static_cast<std::size_t>(end - digits.data()) });
     }
 
     void Pad(std::size_t column) noexcept {
@@ -60,7 +84,7 @@ public:
     }
 
     [[nodiscard]] std::string_view View() const noexcept {
-        return std::string_view{buffer_.data(), size_};
+        return std::string_view{ buffer_.data(), size_ };
     }
 
 private:
@@ -72,7 +96,7 @@ private:
 
 std::string_view Name(Op op) noexcept {
     const auto index = std::to_underlying(op);
-    return index < kOpNames.size() ? kOpNames[index] : std::string_view{"?"};
+    return index < kOpNames.size() ? kOpNames[index] : std::string_view{ "?" };
 }
 
 namespace detail {
@@ -86,29 +110,29 @@ std::string_view FormatInstruction(const Program& program, std::size_t index, st
     line.Append(Name(in.op));
 
     switch(in.op) {
-    case Op::PushConst:
-        line.Pad(4 + kOpColumnWidth + 1);
-        line.Append(in.imm);
-        break;
-    case Op::PushVar:
-        line.Pad(4 + kOpColumnWidth + 1);
-        line.Append(program.VariableName(in.arg));
-        break;
-    case Op::AndJump:
-    case Op::OrJump:
-    case Op::JumpIfFalse:
-    case Op::Jump:
-        line.Pad(4 + kOpColumnWidth + 1);
-        line.Append(static_cast<std::size_t>(in.arg), 0);
-        break;
-    case Op::Call:
-        line.Pad(4 + kOpColumnWidth + 1);
-        line.Append(Spec(static_cast<FunctionId>(in.aux)).name);
-        line.Append("/");
-        line.Append(static_cast<std::size_t>(in.arg), 0);
-        break;
-    default:
-        break;
+        case Op::PushConst:
+            line.Pad(4 + kOpColumnWidth + 1);
+            line.Append(in.imm);
+            break;
+        case Op::PushVar:
+            line.Pad(4 + kOpColumnWidth + 1);
+            line.Append(program.VariableName(in.arg));
+            break;
+        case Op::AndJump:
+        case Op::OrJump:
+        case Op::JumpIfFalse:
+        case Op::Jump:
+            line.Pad(4 + kOpColumnWidth + 1);
+            line.Append(static_cast<std::size_t>(in.arg), 0);
+            break;
+        case Op::Call:
+            line.Pad(4 + kOpColumnWidth + 1);
+            line.Append(Spec(static_cast<FunctionId>(in.aux)).name);
+            line.Append("/");
+            line.Append(static_cast<std::size_t>(in.arg), 0);
+            break;
+        default:
+            break;
     }
 
     return line.View();

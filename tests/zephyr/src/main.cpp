@@ -30,10 +30,7 @@ std::vector<ee::Value> Bind(const ee::Program& program, std::span<const eet::Bin
         }
         const auto index = program.VariableIndex(binding.name);
         zassert_true(
-            index.has_value(),
-            "unused binding %.*s",
-            static_cast<int>(binding.name.size()),
-            binding.name.data()
+            index.has_value(), "unused binding %.*s", static_cast<int>(binding.name.size()), binding.name.data()
         );
         variables[*index] = binding.value;
     }
@@ -61,21 +58,15 @@ ZTEST(expression_engine, test_evaluation_vectors) {
     for(const eet::EvaluationVector& vector : eet::kEvaluationVectors) {
         const auto program = ee::Compile(vector.expression);
         zassert_true(
-            program.has_value(),
-            "\"%.*s\" failed to compile: %.*s",
-            static_cast<int>(vector.expression.size()),
-            vector.expression.data(),
-            static_cast<int>(ee::Name(program.error().code).size()),
+            program.has_value(), "\"%.*s\" failed to compile: %.*s", static_cast<int>(vector.expression.size()),
+            vector.expression.data(), static_cast<int>(ee::Name(program.error().code).size()),
             ee::Name(program.error().code).data()
         );
 
         const ee::Value actual = program->Evaluate(Bind(*program, vector.bindings));
         zassert_true(
-            eet::WithinUlps(vector.expected, actual, vector.ulps),
-            "\"%.*s\" = %f, expected %f",
-            static_cast<int>(vector.expression.size()),
-            vector.expression.data(),
-            static_cast<double>(actual),
+            eet::WithinUlps(vector.expected, actual, vector.ulps), "\"%.*s\" = %f, expected %f",
+            static_cast<int>(vector.expression.size()), vector.expression.data(), static_cast<double>(actual),
             static_cast<double>(vector.expected)
         );
     }
@@ -85,24 +76,15 @@ ZTEST(expression_engine, test_error_vectors) {
     for(const eet::ErrorVector& vector : eet::kErrorVectors) {
         const auto program = ee::Compile(vector.expression);
         zassert_false(
-            program.has_value(),
-            "\"%.*s\" compiled",
-            static_cast<int>(vector.expression.size()),
+            program.has_value(), "\"%.*s\" compiled", static_cast<int>(vector.expression.size()),
             vector.expression.data()
         );
         zassert_true(
-            program.error() == vector.error,
-            "\"%.*s\": %.*s at %u/%u, expected %.*s at %u/%u",
-            static_cast<int>(vector.expression.size()),
-            vector.expression.data(),
-            static_cast<int>(ee::Name(program.error().code).size()),
-            ee::Name(program.error().code).data(),
-            program.error().position,
-            program.error().length,
-            static_cast<int>(ee::Name(vector.error.code).size()),
-            ee::Name(vector.error.code).data(),
-            vector.error.position,
-            vector.error.length
+            program.error() == vector.error, "\"%.*s\": %.*s at %u/%u, expected %.*s at %u/%u",
+            static_cast<int>(vector.expression.size()), vector.expression.data(),
+            static_cast<int>(ee::Name(program.error().code).size()), ee::Name(program.error().code).data(),
+            program.error().position, program.error().length, static_cast<int>(ee::Name(vector.error.code).size()),
+            ee::Name(vector.error.code).data(), vector.error.position, vector.error.length
         );
     }
 }
@@ -120,8 +102,8 @@ ZTEST(expression_engine, test_function_vectors) {
             }
         }
 
-        std::string folded_text{vector.name};
-        std::string runtime_text{vector.name};
+        std::string folded_text{ vector.name };
+        std::string runtime_text{ vector.name };
         folded_text += '(';
         runtime_text += '(';
         std::vector<ee::Value> values;
@@ -138,22 +120,16 @@ ZTEST(expression_engine, test_function_vectors) {
         zassert_equal(folded->Code().size(), 2u, "%s was not folded", folded_text.c_str());
         const ee::Value folded_value = folded->Evaluate({});
         zassert_true(
-            eet::WithinUlps(vector.expected, folded_value, vector.ulps),
-            "%s = %f, expected %f",
-            folded_text.c_str(),
-            static_cast<double>(folded_value),
-            static_cast<double>(vector.expected)
+            eet::WithinUlps(vector.expected, folded_value, vector.ulps), "%s = %f, expected %f", folded_text.c_str(),
+            static_cast<double>(folded_value), static_cast<double>(vector.expected)
         );
 
         const auto runtime = ee::Compile(runtime_text);
         zassert_true(runtime.has_value(), "%s failed to compile", runtime_text.c_str());
         const ee::Value runtime_value = runtime->Evaluate(values);
         zassert_true(
-            eet::WithinUlps(vector.expected, runtime_value, vector.ulps),
-            "%s = %f, expected %f",
-            runtime_text.c_str(),
-            static_cast<double>(runtime_value),
-            static_cast<double>(vector.expected)
+            eet::WithinUlps(vector.expected, runtime_value, vector.ulps), "%s = %f, expected %f", runtime_text.c_str(),
+            static_cast<double>(runtime_value), static_cast<double>(vector.expected)
         );
     }
 }
@@ -178,19 +154,17 @@ ZTEST(expression_engine, test_limits_at_the_caps) {
 
 ZTEST(expression_engine, test_limits_argument) {
     const auto resource = std::pmr::get_default_resource();
-    zassert_true(ee::Compile("x * 4", resource, {.max_instructions = 4}).has_value());
-    const auto program = ee::Compile("x * 4 + 1.6", resource, {.max_instructions = 4});
+    zassert_true(ee::Compile("x * 4", resource, { .max_instructions = 4 }).has_value());
+    const auto program = ee::Compile("x * 4 + 1.6", resource, { .max_instructions = 4 });
     zassert_false(program.has_value());
     zassert_equal(program.error().code, ee::CompileErrorCode::TooManyInstructions);
 
-    const ee::Limits huge{
-        .max_length = 65535,
+    const ee::Limits huge{ .max_length = 65535,
         .max_instructions = 65535,
         .max_variables = 65535,
         .max_stack = 255,
         .max_nesting = 255,
-        .max_arguments = 255
-    };
+        .max_arguments = 255 };
     zassert_true(huge.Clamped() == ee::Limits{});
 }
 

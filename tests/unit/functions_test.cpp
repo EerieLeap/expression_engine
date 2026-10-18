@@ -47,7 +47,7 @@ std::size_t ArgumentCount(const FunctionSpec& spec, const std::array<Value, 3>& 
 }
 
 std::string Call(std::string_view name, const std::vector<std::string>& arguments) {
-    std::string text{name};
+    std::string text{ name };
     text += '(';
     for(std::size_t i = 0; i < arguments.size(); ++i) {
         text += (i == 0 ? "" : ", ") + arguments[i];
@@ -117,7 +117,9 @@ TEST(Functions, VectorsFoldedAtCompileTimeAndEvaluatedAtRunTime) {
 TEST(Functions, ArgumentCountBoundaries) {
     for(const FunctionSpec& spec : kFunctions) {
         const std::size_t max = spec.max_args == kVariadic ? limits::kMaxArguments : spec.max_args;
-        const auto With = [&spec](std::size_t count) { return Call(spec.name, std::vector<std::string>(count, "1")); };
+        const auto With = [&spec](std::size_t count) {
+            return Call(spec.name, std::vector<std::string>(count, "1"));
+        };
 
         const auto too_few = Compile(With(spec.min_args - 1));
         ASSERT_FALSE(too_few) << spec.name;
@@ -133,10 +135,10 @@ TEST(Functions, ArgumentCountBoundaries) {
 }
 
 TEST(Functions, OneArgumentFormulasMatchTheDocumentation) {
-    const Value samples[]{-2.5f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, 2.5f, 10.0f, testing::kNaN, testing::kInf};
+    const Value samples[]{ -2.5f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, 2.5f, 10.0f, testing::kNaN, testing::kInf };
     for(const Value v : samples) {
         const auto Check = [v](FunctionId id, Value expected) {
-            const Value actual = Invoke(id, std::span<const Value>{&v, 1});
+            const Value actual = Invoke(id, std::span<const Value>{ &v, 1 });
             EXPECT_TRUE(testing::SameValue(expected, actual)) << Spec(id).name << "(" << v << ") = " << actual;
         };
         Check(FunctionId::Abs, std::fabs(v));
@@ -164,21 +166,21 @@ TEST(Functions, OneArgumentFormulasMatchTheDocumentation) {
 }
 
 TEST(Functions, VariadicFormulasFoldFromTheFirstArgument) {
-    const std::array<Value, 3> values{3.0f, 1.0f, 2.0f};
+    const std::array<Value, 3> values{ 3.0f, 1.0f, 2.0f };
     EXPECT_EQ(Invoke(FunctionId::Sum, values), 6.0f);
     EXPECT_EQ(Invoke(FunctionId::Avg, values), 2.0f);
     EXPECT_EQ(Invoke(FunctionId::Min, values), 1.0f);
     EXPECT_EQ(Invoke(FunctionId::Max, values), 3.0f);
 
     // std::min / std::max fold from the first argument, so a leading NaN wins and a later one loses.
-    const std::array<Value, 2> nan_first{testing::kNaN, 1.0f};
-    const std::array<Value, 2> nan_last{1.0f, testing::kNaN};
+    const std::array<Value, 2> nan_first{ testing::kNaN, 1.0f };
+    const std::array<Value, 2> nan_last{ 1.0f, testing::kNaN };
     EXPECT_TRUE(std::isnan(Invoke(FunctionId::Min, nan_first)));
     EXPECT_EQ(Invoke(FunctionId::Min, nan_last), 1.0f);
     EXPECT_TRUE(std::isnan(Invoke(FunctionId::Max, nan_first)));
     EXPECT_EQ(Invoke(FunctionId::Max, nan_last), 1.0f);
 
-    const std::array<Value, 2> pair{1.0f, 2.0f};
+    const std::array<Value, 2> pair{ 1.0f, 2.0f };
     EXPECT_EQ(Invoke(FunctionId::Atan2, pair), std::atan2(1.0f, 2.0f));
     EXPECT_EQ(Invoke(FunctionId::Xor, pair), 3.0f);
 }

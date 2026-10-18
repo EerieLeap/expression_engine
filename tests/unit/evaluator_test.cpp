@@ -63,9 +63,9 @@ TEST(Evaluator, EvaluationVectors) {
 TEST(Evaluator, ReturnsNaNWhenGivenTooFewVariables) {
     const auto program = Compile("x + y");
     ASSERT_TRUE(program);
-    const std::array<Value, 3> values{1.0f, 2.0f, 3.0f};
-    EXPECT_TRUE(std::isnan(program->Evaluate(std::span<const Value>{values.data(), 1})));
-    EXPECT_EQ(program->Evaluate(std::span<const Value>{values.data(), 2}), 3.0f);
+    const std::array<Value, 3> values{ 1.0f, 2.0f, 3.0f };
+    EXPECT_TRUE(std::isnan(program->Evaluate(std::span<const Value>{ values.data(), 1 })));
+    EXPECT_EQ(program->Evaluate(std::span<const Value>{ values.data(), 2 }), 3.0f);
     EXPECT_EQ(program->Evaluate(values), 3.0f);
 }
 
@@ -75,24 +75,24 @@ TEST(Evaluator, ToInt32EdgeCases) {
         std::int32_t expected;
     };
     const Case cases[]{
-        {testing::kNaN, 0},
-        {testing::kInf, 0},
-        {-testing::kInf, 0},
-        {0.0f, 0},
-        {-0.0f, 0},
-        {0.5f, 0},
-        {-0.5f, 0},
-        {3.7f, 3},
-        {-3.7f, -3},
-        {-1.0f, -1},
-        {16777216.0f, 16777216},
-        {2147483648.0f, -2147483647 - 1},
-        {4294967296.0f, 0},
-        {4294967808.0f, 512},
-        {-4294967808.0f, -512},
-        {9223372036854775808.0f, 0},
-        {-9223372036854775808.0f, 0},
-        {1e30f, 0},
+        { testing::kNaN, 0 },
+        { testing::kInf, 0 },
+        { -testing::kInf, 0 },
+        { 0.0f, 0 },
+        { -0.0f, 0 },
+        { 0.5f, 0 },
+        { -0.5f, 0 },
+        { 3.7f, 3 },
+        { -3.7f, -3 },
+        { -1.0f, -1 },
+        { 16777216.0f, 16777216 },
+        { 2147483648.0f, -2147483647 - 1 },
+        { 4294967296.0f, 0 },
+        { 4294967808.0f, 512 },
+        { -4294967808.0f, -512 },
+        { 9223372036854775808.0f, 0 },
+        { -9223372036854775808.0f, 0 },
+        { 1e30f, 0 },
     };
     for(const Case& c : cases) {
         EXPECT_EQ(detail::ToInt32(c.value), c.expected) << c.value;
@@ -100,7 +100,7 @@ TEST(Evaluator, ToInt32EdgeCases) {
 }
 
 TEST(Evaluator, BitwiseOperatorsAtRunTime) {
-    const testing::Binding bindings[]{{"x", 6.0f}, {"y", 3.0f}};
+    const testing::Binding bindings[]{ { "x", 6.0f }, { "y", 3.0f } };
     EXPECT_EQ(Eval("x & y", bindings), 2.0f);
     EXPECT_EQ(Eval("x | y", bindings), 7.0f);
     EXPECT_EQ(Eval("xor(x, y)", bindings), 5.0f);
@@ -118,30 +118,30 @@ TEST(Evaluator, ShiftCounts) {
         Value expected;
     };
     const Case cases[]{
-        {"x << n", 1.0f, -1.0f, 0.0f},
-        {"x << n", 1.0f, 0.0f, 1.0f},
-        {"x << n", 1.0f, 2.9f, 4.0f},
-        {"x << n", 1.0f, 31.0f, -2147483648.0f},
-        {"x << n", 1.0f, 32.0f, 0.0f},
-        {"x << n", 1.0f, 1e10f, 0.0f},
-        {"x << n", 1.0f, testing::kNaN, 1.0f},
-        {"x >> n", -8.0f, 1.0f, -4.0f},
-        {"x >> n", -8.0f, 31.0f, -1.0f},
-        {"x >> n", -8.0f, 32.0f, 0.0f},
-        {"x >> n", -8.0f, -1.0f, 0.0f},
-        {"x >> n", 2147483648.0f, 31.0f, -1.0f},
-        {"x >> n", 1024.0f, 3.0f, 128.0f},
+        { "x << n", 1.0f, -1.0f, 0.0f },
+        { "x << n", 1.0f, 0.0f, 1.0f },
+        { "x << n", 1.0f, 2.9f, 4.0f },
+        { "x << n", 1.0f, 31.0f, -2147483648.0f },
+        { "x << n", 1.0f, 32.0f, 0.0f },
+        { "x << n", 1.0f, 1e10f, 0.0f },
+        { "x << n", 1.0f, testing::kNaN, 1.0f },
+        { "x >> n", -8.0f, 1.0f, -4.0f },
+        { "x >> n", -8.0f, 31.0f, -1.0f },
+        { "x >> n", -8.0f, 32.0f, 0.0f },
+        { "x >> n", -8.0f, -1.0f, 0.0f },
+        { "x >> n", 2147483648.0f, 31.0f, -1.0f },
+        { "x >> n", 1024.0f, 3.0f, 128.0f },
     };
     for(const Case& c : cases) {
-        const testing::Binding bindings[]{{"x", c.x}, {"n", c.n}};
+        const testing::Binding bindings[]{ { "x", c.x }, { "n", c.n } };
         EXPECT_TRUE(testing::SameValue(c.expected, Eval(c.text, bindings))) << c.text << " x=" << c.x << " n=" << c.n;
     }
 }
 
 TEST(Evaluator, ShortCircuitWithNaNOperands) {
-    const testing::Binding zero[]{{"x", 0.0f}};
-    const testing::Binding one[]{{"x", 1.0f}};
-    const testing::Binding nan[]{{"x", testing::kNaN}};
+    const testing::Binding zero[]{ { "x", 0.0f } };
+    const testing::Binding one[]{ { "x", 1.0f } };
+    const testing::Binding nan[]{ { "x", testing::kNaN } };
     EXPECT_EQ(Eval("x && (0 / 0)", zero), 0.0f);
     EXPECT_EQ(Eval("x && (0 / 0)", one), 1.0f);
     EXPECT_EQ(Eval("x && (0 / 0)", nan), 1.0f);
@@ -151,8 +151,8 @@ TEST(Evaluator, ShortCircuitWithNaNOperands) {
 }
 
 TEST(Evaluator, ComparisonsYieldExactlyOneOrZero) {
-    const testing::Binding bindings[]{{"x", 2.5f}, {"y", -1.0f}};
-    for(const std::string_view text : {"x < y", "x > y", "x <= y", "x >= y", "x == y", "x != y"}) {
+    const testing::Binding bindings[]{ { "x", 2.5f }, { "y", -1.0f } };
+    for(const std::string_view text : { "x < y", "x > y", "x <= y", "x >= y", "x == y", "x != y" }) {
         const Value value = Eval(text, bindings);
         EXPECT_TRUE(value == 0.0f || value == 1.0f) << text;
     }
@@ -161,7 +161,7 @@ TEST(Evaluator, ComparisonsYieldExactlyOneOrZero) {
 TEST(Evaluator, IsReentrantAcrossThreads) {
     const auto program = Compile("sum(x, y, 1) * atan2(x, y) + (x > y ? x : y)");
     ASSERT_TRUE(program);
-    const std::array<Value, 2> variables{2.0f, 3.0f};
+    const std::array<Value, 2> variables{ 2.0f, 3.0f };
     const Value expected = program->Evaluate(variables);
 
     std::vector<std::thread> threads;
