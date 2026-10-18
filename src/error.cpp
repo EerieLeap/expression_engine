@@ -7,7 +7,7 @@ namespace eerie_leap::expression_engine {
 
 namespace {
 
-constexpr std::array<std::string_view, kCompileErrorCodeCount> kDescriptions{ {
+constexpr std::array<std::string_view, kCompileErrorCodeCount> DESCRIPTIONS{ {
     "empty expression",
     "expression too long",
     "unexpected character",
@@ -26,7 +26,7 @@ constexpr std::array<std::string_view, kCompileErrorCodeCount> kDescriptions{ {
     "out of memory",
 } };
 
-constexpr std::array<std::string_view, kCompileErrorCodeCount> kNames{ {
+constexpr std::array<std::string_view, kCompileErrorCodeCount> NAMES{ {
     "Empty",
     "TooLong",
     "UnexpectedCharacter",
@@ -49,12 +49,12 @@ constexpr std::array<std::string_view, kCompileErrorCodeCount> kNames{ {
 
 std::string_view Describe(CompileErrorCode code) noexcept {
     const auto index = std::to_underlying(code);
-    return index < kDescriptions.size() ? kDescriptions[index] : std::string_view{ "unknown error" };
+    return index < DESCRIPTIONS.size() ? DESCRIPTIONS[index] : std::string_view{ "unknown error" };
 }
 
 std::string_view Name(CompileErrorCode code) noexcept {
     const auto index = std::to_underlying(code);
-    return index < kNames.size() ? kNames[index] : std::string_view{ "?" };
+    return index < NAMES.size() ? NAMES[index] : std::string_view{ "?" };
 }
 
 } // namespace eerie_leap::expression_engine

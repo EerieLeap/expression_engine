@@ -9,16 +9,16 @@ namespace eerie_leap::expression_engine::detail {
 
 namespace {
 
-const std::string_view kText = "x + y + x + z";
+const std::string_view EXPRESSION_TEXT = "x + y + x + z";
 
 std::string_view Slice(std::size_t offset, std::size_t length) {
-    return kText.substr(offset, length);
+    return EXPRESSION_TEXT.substr(offset, length);
 }
 
 } // namespace
 
 TEST(Emitter, FoldsConstantBinaryOperation) {
-    Emitter emitter(kText, Limits{});
+    Emitter emitter(EXPRESSION_TEXT, Limits{});
     ASSERT_TRUE(emitter.EmitConst(2.0F));
     ASSERT_TRUE(emitter.EmitConst(3.0F));
     ASSERT_TRUE(emitter.EmitBinary(Op::Mul));
@@ -34,7 +34,7 @@ TEST(Emitter, FoldsConstantBinaryOperation) {
 }
 
 TEST(Emitter, FoldsConstantUnaryOperation) {
-    Emitter emitter(kText, Limits{});
+    Emitter emitter(EXPRESSION_TEXT, Limits{});
     ASSERT_TRUE(emitter.EmitConst(2.0F));
     ASSERT_TRUE(emitter.EmitUnary(Op::Neg));
     ASSERT_TRUE(emitter.EmitUnary(Op::ToBool));
@@ -44,7 +44,7 @@ TEST(Emitter, FoldsConstantUnaryOperation) {
 }
 
 TEST(Emitter, FoldsCallWithConstantArguments) {
-    Emitter emitter(kText, Limits{});
+    Emitter emitter(EXPRESSION_TEXT, Limits{});
     ASSERT_TRUE(emitter.EmitConst(1.0F));
     ASSERT_TRUE(emitter.EmitConst(2.0F));
     ASSERT_TRUE(emitter.EmitConst(3.0F));
@@ -56,7 +56,7 @@ TEST(Emitter, FoldsCallWithConstantArguments) {
 }
 
 TEST(Emitter, DoesNotFoldCallWithVariableArgument) {
-    Emitter emitter(kText, Limits{});
+    Emitter emitter(EXPRESSION_TEXT, Limits{});
     ASSERT_TRUE(emitter.EmitConst(1.0F));
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
     ASSERT_TRUE(emitter.EmitConst(2.0F));
@@ -75,7 +75,7 @@ TEST(Emitter, DoesNotFoldCallWithVariableArgument) {
 }
 
 TEST(Emitter, FlushesPendingConstantsInOrderBeforeAVariable) {
-    Emitter emitter(kText, Limits{});
+    Emitter emitter(EXPRESSION_TEXT, Limits{});
     ASSERT_TRUE(emitter.EmitConst(1.0F));
     ASSERT_TRUE(emitter.EmitConst(2.0F));
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
@@ -94,7 +94,7 @@ TEST(Emitter, FlushesPendingConstantsInOrderBeforeAVariable) {
 }
 
 TEST(Emitter, InternsVariableNames) {
-    Emitter emitter(kText, Limits{});
+    Emitter emitter(EXPRESSION_TEXT, Limits{});
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1))); // x
     ASSERT_TRUE(emitter.EmitVariable(Slice(4, 1))); // y
     ASSERT_TRUE(emitter.EmitBinary(Op::Add));
@@ -115,7 +115,7 @@ TEST(Emitter, InternsVariableNames) {
 }
 
 TEST(Emitter, PatchesTernaryJumpsAndRestoresDepth) {
-    Emitter emitter(kText, Limits{});
+    Emitter emitter(EXPRESSION_TEXT, Limits{});
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
     const auto skip_true = emitter.EmitJump(Op::JumpIfFalse);
     ASSERT_TRUE(skip_true);
@@ -141,7 +141,7 @@ TEST(Emitter, PatchesTernaryJumpsAndRestoresDepth) {
 
 TEST(Emitter, DoesNotFoldAcrossAJumpTarget) {
     // (0 ? 2 : 3) + 4: the 3 at the false label must not be folded with the 4.
-    Emitter emitter(kText, Limits{});
+    Emitter emitter(EXPRESSION_TEXT, Limits{});
     ASSERT_TRUE(emitter.EmitConst(0.0F));
     const auto skip_true = emitter.EmitJump(Op::JumpIfFalse);
     ASSERT_TRUE(skip_true);
@@ -164,7 +164,7 @@ TEST(Emitter, DoesNotFoldAcrossAJumpTarget) {
 }
 
 TEST(Emitter, AndJumpArrivesWithTheResultOnTheStack) {
-    Emitter emitter(kText, Limits{});
+    Emitter emitter(EXPRESSION_TEXT, Limits{});
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
     const auto jump = emitter.EmitJump(Op::AndJump);
     ASSERT_TRUE(jump);
@@ -183,7 +183,7 @@ TEST(Emitter, AndJumpArrivesWithTheResultOnTheStack) {
 }
 
 TEST(Emitter, ReportsTooManyInstructions) {
-    Emitter emitter(kText, Limits{ .max_instructions = 3 });
+    Emitter emitter(EXPRESSION_TEXT, Limits{ .max_instructions = 3 });
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
     ASSERT_TRUE(emitter.EmitVariable(Slice(4, 1)));
     ASSERT_TRUE(emitter.EmitBinary(Op::Add));
@@ -193,7 +193,7 @@ TEST(Emitter, ReportsTooManyInstructions) {
 }
 
 TEST(Emitter, ReportsStackTooDeepForMaterializedValuesOnly) {
-    Emitter emitter(kText, Limits{ .max_stack = 2 });
+    Emitter emitter(EXPRESSION_TEXT, Limits{ .max_stack = 2 });
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
     ASSERT_TRUE(emitter.EmitVariable(Slice(4, 1)));
     const auto third = emitter.EmitVariable(Slice(12, 1));
@@ -201,7 +201,7 @@ TEST(Emitter, ReportsStackTooDeepForMaterializedValuesOnly) {
     EXPECT_EQ(third.error(), CompileErrorCode::StackTooDeep);
 
     // Pending constants never touch the evaluation stack.
-    Emitter folding(kText, Limits{ .max_stack = 1 });
+    Emitter folding(EXPRESSION_TEXT, Limits{ .max_stack = 1 });
     for(int i = 0; i < 5; ++i) {
         ASSERT_TRUE(folding.EmitConst(1.0F));
     }
@@ -214,7 +214,7 @@ TEST(Emitter, ReportsStackTooDeepForMaterializedValuesOnly) {
 }
 
 TEST(Emitter, ReportsTooManyVariables) {
-    Emitter emitter(kText, Limits{ .max_variables = 1 });
+    Emitter emitter(EXPRESSION_TEXT, Limits{ .max_variables = 1 });
     ASSERT_TRUE(emitter.EmitVariable(Slice(0, 1)));
     const auto second = emitter.EmitVariable(Slice(4, 1));
     ASSERT_FALSE(second);

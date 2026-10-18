@@ -15,7 +15,7 @@ struct ErrorVector {
     CompileError error;
 };
 
-inline constexpr std::array<ErrorVector, 42> kErrorVectors{ {
+inline constexpr std::array<ErrorVector, 42> ERROR_VECTORS{ {
     { "", { CompileErrorCode::Empty, 0, 0 } },
     { "   \t\n", { CompileErrorCode::Empty, 0, 0 } },
     { "1 +", { CompileErrorCode::UnexpectedEnd, 3, 0 } },

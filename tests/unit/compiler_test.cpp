@@ -16,7 +16,7 @@
 namespace eerie_leap::expression_engine {
 
 TEST(Compiler, ReportsEveryErrorVector) {
-    for(const testing::ErrorVector& vector : testing::kErrorVectors) {
+    for(const testing::ErrorVector& vector : testing::ERROR_VECTORS) {
         const auto program = Compile(vector.expression);
         ASSERT_FALSE(program) << "\"" << vector.expression << "\" compiled";
         EXPECT_EQ(program.error(), vector.error) << "\"" << vector.expression << "\"";
@@ -155,7 +155,7 @@ TEST(Compiler, HonoursLoweredLimits) {
     EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::TooLong, 3, 1 }));
 }
 
-#if defined(__cpp_exceptions)
+#ifdef __cpp_exceptions
 TEST(Compiler, ReportsOutOfMemoryWhenTheResourceFails) {
     testing::CountingResource failing(true);
     const auto program = Compile("x + 1", &failing);
@@ -205,17 +205,17 @@ TEST(Compiler, NumbersVariablesInOrderOfFirstAppearance) {
 }
 
 TEST(Compiler, ReportsExactMaxStackDepth) {
-    const auto Depth = [](std::string_view text) {
+    const auto depth = [](std::string_view text) {
         const auto program = Compile(text);
         return program ? program->MaxStackDepth() : 255;
     };
-    EXPECT_EQ(Depth("x"), 1);
-    EXPECT_EQ(Depth("2 * 3"), 1);
-    EXPECT_EQ(Depth("x * 4 + 1.6"), 2);
-    EXPECT_EQ(Depth("1 + 2 * x"), 3);
-    EXPECT_EQ(Depth("sum(x, y, z)"), 3);
-    EXPECT_EQ(Depth("x ? y : z"), 1);
-    EXPECT_EQ(Depth("x && y"), 1);
+    EXPECT_EQ(depth("x"), 1);
+    EXPECT_EQ(depth("2 * 3"), 1);
+    EXPECT_EQ(depth("x * 4 + 1.6"), 2);
+    EXPECT_EQ(depth("1 + 2 * x"), 3);
+    EXPECT_EQ(depth("sum(x, y, z)"), 3);
+    EXPECT_EQ(depth("x ? y : z"), 1);
+    EXPECT_EQ(depth("x && y"), 1);
 }
 
 TEST(Compiler, IgnoresSurroundingWhitespace) {

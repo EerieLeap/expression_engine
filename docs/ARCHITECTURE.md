@@ -189,7 +189,7 @@ table pick it up from the table.
 **A binary operator.** Add the token to `TokenKind` and the lexer's `switch`, the opcode to `Op`
 (append; the disassembler's name table and `IsBinary()` in `src/ops.hpp` must follow), its
 semantics to `ApplyBinary()`, and the row to `kBinaryOperators` in `src/parser.cpp` with its
-precedence. Add it to `kOperators` in `tests/support/expression_generator.hpp` so the property
+precedence. Add it to `OPERATORS` in `tests/support/expression_generator.hpp` so the property
 test covers it, and to the precedence table in `docs/LANGUAGE.md`.
 
 **An error code.** Append to `CompileErrorCode`, bump `kCompileErrorCodeCount`, add the

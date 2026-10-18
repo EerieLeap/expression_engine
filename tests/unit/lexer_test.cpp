@@ -112,7 +112,7 @@ TEST(Lexer, ParsesDecimalNumbers) {
         { "1E-3", 0.001F, 4 },
         { "2.5e+2", 250.0F, 6 },
         { "007", 7.0F, 3 },
-        { "3.1415927", 3.1415927F, 9 },
+        { "3.1415927", 3.1415927F, 9 }, // NOLINT(modernize-use-std-numbers): lexer input text, not a use of pi
     };
     for(const Case& c : cases) {
         const auto tokens = Tokenize(c.text);

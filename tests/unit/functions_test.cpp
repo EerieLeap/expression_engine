@@ -74,7 +74,7 @@ TEST(Functions, TableIsSortedAndSearchable) {
 TEST(Functions, EveryFunctionHasAVector) {
     for(const FunctionSpec& spec : kFunctions) {
         bool found = false;
-        for(const testing::FunctionVector& vector : testing::kFunctionVectors) {
+        for(const testing::FunctionVector& vector : testing::FUNCTION_VECTORS) {
             found = found || vector.name == spec.name;
         }
         EXPECT_TRUE(found) << spec.name;
@@ -82,7 +82,7 @@ TEST(Functions, EveryFunctionHasAVector) {
 }
 
 TEST(Functions, VectorsFoldedAtCompileTimeAndEvaluatedAtRunTime) {
-    for(const testing::FunctionVector& vector : testing::kFunctionVectors) {
+    for(const testing::FunctionVector& vector : testing::FUNCTION_VECTORS) {
         const FunctionSpec* spec = FindFunction(vector.name);
         ASSERT_NE(spec, nullptr) << vector.name;
         const std::size_t argc = ArgumentCount(*spec, vector.args);
@@ -117,51 +117,58 @@ TEST(Functions, VectorsFoldedAtCompileTimeAndEvaluatedAtRunTime) {
 TEST(Functions, ArgumentCountBoundaries) {
     for(const FunctionSpec& spec : kFunctions) {
         const std::size_t max = spec.max_args == kVariadic ? limits::kMaxArguments : spec.max_args;
-        const auto With = [&spec](std::size_t count) {
+        const auto with = [&spec](std::size_t count) {
             return Call(spec.name, std::vector<std::string>(count, "1"));
         };
 
-        const auto too_few = Compile(With(spec.min_args - 1));
+        const auto too_few = Compile(with(spec.min_args - 1));
         ASSERT_FALSE(too_few) << spec.name;
         EXPECT_EQ(too_few.error().code, CompileErrorCode::WrongArgumentCount) << spec.name;
 
-        EXPECT_TRUE(Compile(With(spec.min_args))) << spec.name;
-        EXPECT_TRUE(Compile(With(max))) << spec.name;
+        EXPECT_TRUE(Compile(with(spec.min_args))) << spec.name;
+        EXPECT_TRUE(Compile(with(max))) << spec.name;
 
-        const auto too_many = Compile(With(max + 1));
+        const auto too_many = Compile(with(max + 1));
         ASSERT_FALSE(too_many) << spec.name;
         EXPECT_EQ(too_many.error().code, CompileErrorCode::WrongArgumentCount) << spec.name;
     }
 }
 
 TEST(Functions, OneArgumentFormulasMatchTheDocumentation) {
-    const Value samples[]{ -2.5F, -1.0F, -0.5F, 0.0F, 0.5F, 1.0F, 2.5F, 10.0F, testing::kNaN, testing::kInf };
+    const Value samples[]{ -2.5F, -1.0F, -0.5F, 0.0F, 0.5F, 1.0F, 2.5F, 10.0F, testing::NAN_VALUE, testing::INF_VALUE };
     for(const Value v : samples) {
-        const auto Check = [v](FunctionId id, Value expected) {
+        Value sign = 0.0F;
+        if(v < 0.0F) {
+            sign = -1.0F;
+        } else if(v > 0.0F) {
+            sign = 1.0F;
+        }
+        const auto check = [v](FunctionId id, Value expected) {
             const Value actual = Invoke(id, std::span<const Value>{ &v, 1 });
             EXPECT_TRUE(testing::SameValue(expected, actual)) << Spec(id).name << "(" << v << ") = " << actual;
         };
-        Check(FunctionId::Abs, std::fabs(v));
-        Check(FunctionId::Acos, std::acos(v));
-        Check(FunctionId::Acosh, std::acosh(v));
-        Check(FunctionId::Asin, std::asin(v));
-        Check(FunctionId::Asinh, std::asinh(v));
-        Check(FunctionId::Atan, std::atan(v));
-        Check(FunctionId::Atanh, std::atanh(v));
-        Check(FunctionId::Cos, std::cos(v));
-        Check(FunctionId::Cosh, std::cosh(v));
-        Check(FunctionId::Exp, std::exp(v));
-        Check(FunctionId::Ln, std::log(v));
-        Check(FunctionId::Log, std::log(v));
-        Check(FunctionId::Log10, std::log10(v));
-        Check(FunctionId::Log2, std::log(v) / std::log(2.0F));
-        Check(FunctionId::Rint, std::floor(v + 0.5F));
-        Check(FunctionId::Sign, v < 0.0F ? -1.0F : (v > 0.0F ? 1.0F : 0.0F));
-        Check(FunctionId::Sin, std::sin(v));
-        Check(FunctionId::Sinh, std::sinh(v));
-        Check(FunctionId::Sqrt, std::sqrt(v));
-        Check(FunctionId::Tan, std::tan(v));
-        Check(FunctionId::Tanh, std::tanh(v));
+        check(FunctionId::Abs, std::fabs(v));
+        check(FunctionId::Acos, std::acos(v));
+        check(FunctionId::Acosh, std::acosh(v));
+        check(FunctionId::Asin, std::asin(v));
+        check(FunctionId::Asinh, std::asinh(v));
+        check(FunctionId::Atan, std::atan(v));
+        check(FunctionId::Atanh, std::atanh(v));
+        check(FunctionId::Cos, std::cos(v));
+        check(FunctionId::Cosh, std::cosh(v));
+        check(FunctionId::Exp, std::exp(v));
+        check(FunctionId::Ln, std::log(v));
+        check(FunctionId::Log, std::log(v));
+        check(FunctionId::Log10, std::log10(v));
+        // NOLINTNEXTLINE(modernize-use-std-numbers): mirrors the documented formula log(v) / log(2)
+        check(FunctionId::Log2, std::log(v) / std::log(2.0F));
+        check(FunctionId::Rint, std::floor(v + 0.5F));
+        check(FunctionId::Sign, sign);
+        check(FunctionId::Sin, std::sin(v));
+        check(FunctionId::Sinh, std::sinh(v));
+        check(FunctionId::Sqrt, std::sqrt(v));
+        check(FunctionId::Tan, std::tan(v));
+        check(FunctionId::Tanh, std::tanh(v));
     }
 }
 
@@ -173,8 +180,8 @@ TEST(Functions, VariadicFormulasFoldFromTheFirstArgument) {
     EXPECT_EQ(Invoke(FunctionId::Max, values), 3.0F);
 
     // std::min / std::max fold from the first argument, so a leading NaN wins and a later one loses.
-    const std::array<Value, 2> nan_first{ testing::kNaN, 1.0F };
-    const std::array<Value, 2> nan_last{ 1.0F, testing::kNaN };
+    const std::array<Value, 2> nan_first{ testing::NAN_VALUE, 1.0F };
+    const std::array<Value, 2> nan_last{ 1.0F, testing::NAN_VALUE };
     EXPECT_TRUE(std::isnan(Invoke(FunctionId::Min, nan_first)));
     EXPECT_EQ(Invoke(FunctionId::Min, nan_last), 1.0F);
     EXPECT_TRUE(std::isnan(Invoke(FunctionId::Max, nan_first)));

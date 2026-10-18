@@ -27,7 +27,7 @@ Emitter::Result Emitter::Append(Instruction instruction, int stack_delta) noexce
 }
 
 Emitter::Result Emitter::PushOperand(Operand operand) noexcept {
-    if(operand_count_ >= kOperandCapacity) {
+    if(operand_count_ >= OPERAND_CAPACITY) {
         return std::unexpected(CompileErrorCode::StackTooDeep);
     }
     operands_[operand_count_++] = operand;

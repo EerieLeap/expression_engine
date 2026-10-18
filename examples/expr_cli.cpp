@@ -43,6 +43,7 @@ int main(int argc, char* const* argv) {
     for(int i = 2; i < argc; ++i) {
         Binding binding{};
         if(!ParseBinding(argv[i], binding)) {
+            // NOLINTNEXTLINE(modernize-use-std-print): <print> needs libstdc++ 14; the library supports GCC 12+
             std::fprintf(stderr, "bad binding: %s\n", argv[i]);
             return 2;
         }
@@ -52,6 +53,7 @@ int main(int argc, char* const* argv) {
     const auto program = ee::Compile(text);
     if(!program) {
         const ee::CompileError& error = program.error();
+        // NOLINTNEXTLINE(modernize-use-std-print): <print> needs libstdc++ 14; the library supports GCC 12+
         std::fprintf(
             stderr, "error: %.*s at %u\n%.*s\n%*s^\n", static_cast<int>(ee::Describe(error.code).size()),
             ee::Describe(error.code).data(), static_cast<unsigned>(error.position), static_cast<int>(text.size()),
@@ -61,6 +63,7 @@ int main(int argc, char* const* argv) {
     }
 
     ee::Disassemble(*program, [](std::string_view line) {
+        // NOLINTNEXTLINE(modernize-use-std-print): <print> needs libstdc++ 14; the library supports GCC 12+
         std::printf("%.*s\n", static_cast<int>(line.size()), line.data());
     });
 
@@ -75,11 +78,13 @@ int main(int argc, char* const* argv) {
             }
         }
         if(!bound) {
+            // NOLINTNEXTLINE(modernize-use-std-print): <print> needs libstdc++ 14; the library supports GCC 12+
             std::fprintf(stderr, "unbound variable: %.*s\n", static_cast<int>(name.size()), name.data());
             return 1;
         }
     }
 
+    // NOLINTNEXTLINE(modernize-use-std-print): <print> needs libstdc++ 14; the library supports GCC 12+
     std::printf("= %.9g\n", static_cast<double>(program->Evaluate(variables)));
     return 0;
 }

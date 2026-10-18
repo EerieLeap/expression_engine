@@ -31,7 +31,7 @@ TEST(Disassembler, FormatsEveryOperandKind) {
 }
 
 TEST(Disassembler, FormatsSpecialValues) {
-    const auto Line = [](std::string_view text) {
+    const auto first_line = [](std::string_view text) {
         const auto program = Compile(text);
         if(!program) {
             ADD_FAILURE() << text;
@@ -45,12 +45,12 @@ TEST(Disassembler, FormatsSpecialValues) {
         });
         return first;
     };
-    EXPECT_EQ(Line("1 / 0"), "  0 PushConst   inf");
-    EXPECT_EQ(Line("-1 / 0"), "  0 PushConst   -inf");
-    EXPECT_EQ(Line("0 / 0"), "  0 PushConst   nan");
-    EXPECT_EQ(Line("1e10"), "  0 PushConst   1e+10");
-    EXPECT_EQ(Line("0.1"), "  0 PushConst   0.1");
-    EXPECT_EQ(Line("0xFFFFFFFF"), "  0 PushConst   -1");
+    EXPECT_EQ(first_line("1 / 0"), "  0 PushConst   inf");
+    EXPECT_EQ(first_line("-1 / 0"), "  0 PushConst   -inf");
+    EXPECT_EQ(first_line("0 / 0"), "  0 PushConst   nan");
+    EXPECT_EQ(first_line("1e10"), "  0 PushConst   1e+10");
+    EXPECT_EQ(first_line("0.1"), "  0 PushConst   0.1");
+    EXPECT_EQ(first_line("0xFFFFFFFF"), "  0 PushConst   -1");
 }
 
 TEST(Disassembler, NamesEveryOpcode) {

@@ -41,7 +41,7 @@ Value Eval(std::string_view text, std::span<const testing::Binding> bindings = {
     const auto program = Compile(text);
     if(!program) {
         ADD_FAILURE() << "\"" << text << "\" failed: " << Name(program.error().code);
-        return testing::kNaN;
+        return testing::NAN_VALUE;
     }
     return program->Evaluate(Bind(*program, bindings, false));
 }
@@ -49,7 +49,7 @@ Value Eval(std::string_view text, std::span<const testing::Binding> bindings = {
 } // namespace
 
 TEST(Evaluator, EvaluationVectors) {
-    for(const testing::EvaluationVector& vector : testing::kEvaluationVectors) {
+    for(const testing::EvaluationVector& vector : testing::EVALUATION_VECTORS) {
         const auto program = Compile(vector.expression);
         ASSERT_TRUE(program) << "\"" << vector.expression << "\" failed: " << Name(program.error().code) << " at "
                              << program.error().position;
@@ -75,9 +75,9 @@ TEST(Evaluator, ToInt32EdgeCases) {
         std::int32_t expected;
     };
     const Case cases[]{
-        { testing::kNaN, 0 },
-        { testing::kInf, 0 },
-        { -testing::kInf, 0 },
+        { testing::NAN_VALUE, 0 },
+        { testing::INF_VALUE, 0 },
+        { -testing::INF_VALUE, 0 },
         { 0.0F, 0 },
         { -0.0F, 0 },
         { 0.5F, 0 },
@@ -124,7 +124,7 @@ TEST(Evaluator, ShiftCounts) {
         { "x << n", 1.0F, 31.0F, -2147483648.0F },
         { "x << n", 1.0F, 32.0F, 0.0F },
         { "x << n", 1.0F, 1e10F, 0.0F },
-        { "x << n", 1.0F, testing::kNaN, 1.0F },
+        { "x << n", 1.0F, testing::NAN_VALUE, 1.0F },
         { "x >> n", -8.0F, 1.0F, -4.0F },
         { "x >> n", -8.0F, 31.0F, -1.0F },
         { "x >> n", -8.0F, 32.0F, 0.0F },
@@ -141,7 +141,7 @@ TEST(Evaluator, ShiftCounts) {
 TEST(Evaluator, ShortCircuitWithNaNOperands) {
     const testing::Binding zero[]{ { "x", 0.0F } };
     const testing::Binding one[]{ { "x", 1.0F } };
-    const testing::Binding nan[]{ { "x", testing::kNaN } };
+    const testing::Binding nan[]{ { "x", testing::NAN_VALUE } };
     EXPECT_EQ(Eval("x && (0 / 0)", zero), 0.0F);
     EXPECT_EQ(Eval("x && (0 / 0)", one), 1.0F);
     EXPECT_EQ(Eval("x && (0 / 0)", nan), 1.0F);
@@ -166,6 +166,7 @@ TEST(Evaluator, IsReentrantAcrossThreads) {
 
     std::vector<std::thread> threads;
     std::array<bool, 4> ok{};
+    threads.reserve(ok.size());
     for(bool& t : ok) {
         threads.emplace_back([&] {
             bool all = true;

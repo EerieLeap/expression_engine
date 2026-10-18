@@ -28,10 +28,10 @@ struct EvaluationVector {
     std::uint32_t ulps = 0;
 };
 
-inline constexpr Value kNaN = std::numeric_limits<Value>::quiet_NaN();
-inline constexpr Value kInf = std::numeric_limits<Value>::infinity();
+inline constexpr Value NAN_VALUE = std::numeric_limits<Value>::quiet_NaN();
+inline constexpr Value INF_VALUE = std::numeric_limits<Value>::infinity();
 
-inline constexpr std::array<EvaluationVector, 100> kEvaluationVectors{ {
+inline constexpr std::array<EvaluationVector, 100> EVALUATION_VECTORS{ {
     // arithmetic, precedence, associativity
     { "1 + 2 * 3", {}, 7.0F },
     { "(1 + 2) * 3", {}, 9.0F },
@@ -90,9 +90,9 @@ inline constexpr std::array<EvaluationVector, 100> kEvaluationVectors{ {
     { "2 * _pi", {}, 2.0F * std::numbers::pi_v<Value> },
     { "_e", {}, std::numbers::e_v<Value> },
     // IEEE behaviour
-    { "1 / 0", {}, kInf },
-    { "-1 / 0", {}, -kInf },
-    { "0 / 0", {}, kNaN },
+    { "1 / 0", {}, INF_VALUE },
+    { "-1 / 0", {}, -INF_VALUE },
+    { "0 / 0", {}, NAN_VALUE },
     { "(0 / 0) == (0 / 0)", {}, 0.0F },
     { "(0 / 0) < 1", {}, 0.0F },
     { "(0 / 0) != 1", {}, 1.0F },
@@ -100,9 +100,9 @@ inline constexpr std::array<EvaluationVector, 100> kEvaluationVectors{ {
     { "(0 / 0) && 1", {}, 1.0F },
     { "0 && (0 / 0)", {}, 0.0F },
     { "(0 / 0) || 0", {}, 1.0F },
-    { "x && 1", { { { "x", kNaN } } }, 1.0F },
-    { "x + 1", { { { "x", kNaN } } }, kNaN },
-    { "x ? 1 : 2", { { { "x", kNaN } } }, 1.0F },
+    { "x && 1", { { { "x", NAN_VALUE } } }, 1.0F },
+    { "x + 1", { { { "x", NAN_VALUE } } }, NAN_VALUE },
+    { "x ? 1 : 2", { { { "x", NAN_VALUE } } }, 1.0F },
     // bitwise operators and integer literals
     { "6 & 3", {}, 2.0F },
     { "6 | 3", {}, 7.0F },

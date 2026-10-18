@@ -59,6 +59,11 @@ public:
     // Consumes and returns the next token. At the end of the text it keeps returning End.
     [[nodiscard]] std::expected<Token, CompileError> Next() noexcept;
 
+    // Consumes the token a successful Peek() just returned; it cannot fail, so there is no result.
+    void Skip() noexcept {
+        peeked_.reset();
+    }
+
     [[nodiscard]] std::string_view Text(const Token& token) const noexcept {
         return text_.substr(token.position, token.length);
     }

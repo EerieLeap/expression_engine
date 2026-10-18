@@ -59,6 +59,7 @@ TEST(Generator, BothRenderingsEvaluateToTheGeneratedValue) {
         }
     }
 
+    // NOLINTNEXTLINE(modernize-use-std-print): <print> needs libstdc++ 14; the library supports GCC 12+
     std::printf("generated %zu renderings, %zu skipped for exceeding a limit\n", total, skipped);
     EXPECT_LT(skipped * 10, total);
 }

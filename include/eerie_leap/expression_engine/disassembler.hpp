@@ -24,7 +24,11 @@ FormatInstruction(const Program& program, std::size_t index, std::span<char> buf
 // Calls `sink` once per instruction with a line such as "  3 Call        sum/2". No allocation;
 // each line lives in a stack buffer until the sink returns.
 template<std::invocable<std::string_view> Sink>
-void Disassemble(const Program& program, Sink&& sink) {
+void Disassemble(
+    const Program& program,
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): called once per instruction, forwarding would reuse a moved sink
+    Sink&& sink
+) {
     std::array<char, detail::kDisassemblyLineCapacity> buffer{};
     const std::size_t count = program.Code().size();
     for(std::size_t index = 0; index < count; ++index) {
