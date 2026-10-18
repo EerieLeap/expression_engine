@@ -102,15 +102,11 @@ jobs:
         run: |
           cmake --preset dev
           cmake --build --preset dev
-      # Any warning in a pull request fails the job (-warnings-as-errors); other events only report,
-      # until every source is clean. Only the repository's own sources are linted, not _deps.
+      # Any warning fails the job (-warnings-as-errors). Only the repository's own sources are linted, not _deps.
       - name: Lint
-        continue-on-error: ${{ github.event_name != 'pull_request' }}
         run: |
           set -o pipefail
-          strict=()
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then strict=(-warnings-as-errors='*'); fi
-          run-clang-tidy-23 -p build/dev -quiet "${strict[@]}" "^$PWD/(include|src|tests|examples)/" 2>&1 | tee tidy-report.txt
+          run-clang-tidy-23 -p build/dev -quiet -warnings-as-errors='*' "^$PWD/(include|src|tests|examples)/" 2>&1 | tee tidy-report.txt
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
