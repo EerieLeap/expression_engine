@@ -14,7 +14,7 @@ namespace eerie_leap::expression_engine {
 // allocations: code, variable names, symbols). Never throws: a syntax or limit violation is
 // returned as a CompileError with the position of the offending text, and when exceptions are
 // enabled an allocation failure becomes CompileErrorCode::OutOfMemory. Compilation itself uses
-// the caller's stack only (about limits::kMaxInstructions * 8 bytes of scratch plus the parser's
+// the caller's stack only (about limits::MAX_INSTRUCTIONS * 8 bytes of scratch plus the parser's
 // recursion, bounded by Limits::max_nesting) and no heap.
 //
 // `limits` can only tighten the compile-time caps; fields above a cap are clamped to it.

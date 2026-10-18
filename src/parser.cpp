@@ -329,7 +329,7 @@ Parser::Result Parser::ParseCall(const Token& name) noexcept {
         return r;
     }
 
-    const std::uint8_t max_args = spec->max_args == kVariadic ? limits_.max_arguments : spec->max_args;
+    const std::uint8_t max_args = spec->max_args == VARIADIC ? limits_.max_arguments : spec->max_args;
     std::uint8_t argc = 0;
 
     const auto first = lexer_.Peek();

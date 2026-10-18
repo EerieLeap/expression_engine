@@ -72,7 +72,7 @@ nesting level of the expression adds between 0.6 kB (one parenthesis) and 1.5 kB
 every precedence level). With the default `max_nesting` of 16 the worst case is therefore around
 25 kB; 32-bit targets use less. A thread with a small stack should compile with
 `Limits{.max_nesting = 8}` or lower the Kconfig cap. `Evaluate()` needs about 150 bytes plus the
-`kMaxStack * 4` byte value stack.
+`MAX_STACK * 4` byte value stack.
 
 The Twister suite in `tests/zephyr` runs from any workspace that has this module:
 
@@ -155,7 +155,7 @@ public:
     }
 
     float Evaluate(std::span<const float> sensor_values, float input) const noexcept {
-        std::array<float, ee::limits::kMaxVariables> values{};
+        std::array<float, ee::limits::MAX_VARIABLES> values{};
         std::size_t next = 0;
         for(std::size_t i = 0; i < program_.VariableCount(); ++i) {
             values[i] = (input_index_ == i) ? input : sensor_values[next++];

@@ -12,7 +12,7 @@ namespace eerie_leap::expression_engine {
 
 namespace {
 
-constexpr std::array<std::string_view, kOpCount> OP_NAMES{ {
+constexpr std::array<std::string_view, OP_COUNT> OP_NAMES{ {
     "PushConst",
     "PushVar",
     "Neg",

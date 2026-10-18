@@ -7,7 +7,7 @@ namespace eerie_leap::expression_engine {
 
 namespace {
 
-constexpr std::array<std::string_view, kCompileErrorCodeCount> DESCRIPTIONS{ {
+constexpr std::array<std::string_view, COMPILE_ERROR_CODE_COUNT> DESCRIPTIONS{ {
     "empty expression",
     "expression too long",
     "unexpected character",
@@ -26,7 +26,7 @@ constexpr std::array<std::string_view, kCompileErrorCodeCount> DESCRIPTIONS{ {
     "out of memory",
 } };
 
-constexpr std::array<std::string_view, kCompileErrorCodeCount> NAMES{ {
+constexpr std::array<std::string_view, COMPILE_ERROR_CODE_COUNT> NAMES{ {
     "Empty",
     "TooLong",
     "UnexpectedCharacter",

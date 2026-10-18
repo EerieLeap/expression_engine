@@ -55,13 +55,13 @@ TEST(Disassembler, FormatsSpecialValues) {
 
 TEST(Disassembler, NamesEveryOpcode) {
     std::set<std::string_view> names;
-    for(std::size_t i = 0; i < kOpCount; ++i) {
+    for(std::size_t i = 0; i < OP_COUNT; ++i) {
         const std::string_view name = Name(static_cast<Op>(i));
         EXPECT_FALSE(name.empty()) << i;
         EXPECT_NE(name, "?") << i;
         names.insert(name);
     }
-    EXPECT_EQ(names.size(), kOpCount);
+    EXPECT_EQ(names.size(), OP_COUNT);
     EXPECT_EQ(Name(static_cast<Op>(255)), "?");
     EXPECT_EQ(Name(Op::End), "End");
     EXPECT_EQ(Name(Op::JumpIfFalse), "JumpIfFalse");

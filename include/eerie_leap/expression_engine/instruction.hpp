@@ -41,7 +41,7 @@ enum class Op : std::uint8_t {
     End,         // return the single remaining value
 };
 
-inline constexpr std::size_t kOpCount = 26;
+inline constexpr std::size_t OP_COUNT = 26;
 
 struct Instruction {
     Op op;

@@ -13,7 +13,7 @@ namespace eerie_leap::expression_engine {
 // template parameter.
 using Value = float;
 
-// Byte offset into the expression text; see limits::kMaxLength.
+// Byte offset into the expression text; see limits::MAX_LENGTH.
 using Position = std::uint16_t;
 
 } // namespace eerie_leap::expression_engine

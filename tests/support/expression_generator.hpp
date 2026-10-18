@@ -236,10 +236,10 @@ private:
 
     // NOLINTNEXTLINE(misc-no-recursion): recursion depth is bounded by the depth argument
     GeneratedExpression Call(int depth) {
-        const FunctionSpec& spec = kFunctions[static_cast<std::size_t>(Pick(static_cast<int>(kFunctions.size())))];
-        const std::size_t argc = spec.max_args == kVariadic ? static_cast<std::size_t>(1 + Pick(3)) : spec.min_args;
+        const FunctionSpec& spec = FUNCTIONS[static_cast<std::size_t>(Pick(static_cast<int>(FUNCTIONS.size())))];
+        const std::size_t argc = spec.max_args == VARIADIC ? static_cast<std::size_t>(1 + Pick(3)) : spec.min_args;
 
-        std::array<Value, limits::kMaxArguments> values{};
+        std::array<Value, limits::MAX_ARGUMENTS> values{};
         std::string full{ spec.name };
         std::string minimal{ spec.name };
         full += '(';

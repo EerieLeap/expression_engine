@@ -75,7 +75,7 @@ private:
 
     // Beyond max_stack materialized values, the operand stack also holds the pending constants of
     // the arguments being collected and of the enclosing levels.
-    static constexpr std::size_t OPERAND_CAPACITY = limits::kMaxStack + limits::kMaxArguments + limits::kMaxNesting + 2;
+    static constexpr std::size_t OPERAND_CAPACITY = limits::MAX_STACK + limits::MAX_ARGUMENTS + limits::MAX_NESTING + 2;
 
     [[nodiscard]] Result Append(Instruction instruction, int stack_delta) noexcept;
     [[nodiscard]] Result PushOperand(Operand operand) noexcept;
@@ -86,10 +86,10 @@ private:
     std::string_view text_;
     Limits limits_;
 
-    std::array<Instruction, limits::kMaxInstructions> code_{};
+    std::array<Instruction, limits::MAX_INSTRUCTIONS> code_{};
     std::uint16_t size_ = 0;
 
-    std::array<NameRef, limits::kMaxVariables> names_{};
+    std::array<NameRef, limits::MAX_VARIABLES> names_{};
     std::uint16_t name_count_ = 0;
 
     std::array<Operand, OPERAND_CAPACITY> operands_{};

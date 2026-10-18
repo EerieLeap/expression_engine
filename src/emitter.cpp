@@ -119,7 +119,7 @@ Emitter::Result Emitter::EmitCall(FunctionId id, std::uint8_t argc) noexcept {
     const std::size_t first = operand_count_ - argc;
 
     if(PendingCount() >= argc) {
-        std::array<Value, limits::kMaxArguments> args{};
+        std::array<Value, limits::MAX_ARGUMENTS> args{};
         for(std::size_t i = 0; i < argc; ++i) {
             args[i] = operands_[first + i].value;
         }

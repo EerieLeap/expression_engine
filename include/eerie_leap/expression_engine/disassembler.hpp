@@ -13,7 +13,7 @@ namespace eerie_leap::expression_engine {
 
 namespace detail {
 
-inline constexpr std::size_t kDisassemblyLineCapacity = 96;
+inline constexpr std::size_t DISASSEMBLY_LINE_CAPACITY = 96;
 
 // Writes "<index> <opcode> <operand>" for one instruction into `buffer` and returns the part written.
 [[nodiscard]] std::string_view
@@ -29,7 +29,7 @@ void Disassemble(
     // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): called once per instruction, forwarding would reuse a moved sink
     Sink&& sink
 ) {
-    std::array<char, detail::kDisassemblyLineCapacity> buffer{};
+    std::array<char, detail::DISASSEMBLY_LINE_CAPACITY> buffer{};
     const std::size_t count = program.Code().size();
     for(std::size_t index = 0; index < count; ++index) {
         std::invoke(sink, detail::FormatInstruction(program, index, buffer));

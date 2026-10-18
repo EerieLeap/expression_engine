@@ -36,7 +36,7 @@ std::string Literal(Value value) {
 }
 
 std::size_t ArgumentCount(const FunctionSpec& spec, const std::array<Value, 3>& args) {
-    if(spec.max_args != kVariadic) {
+    if(spec.max_args != VARIADIC) {
         return spec.min_args;
     }
     std::size_t count = 0;
@@ -59,11 +59,11 @@ std::string Call(std::string_view name, const std::vector<std::string>& argument
 } // namespace
 
 TEST(Functions, TableIsSortedAndSearchable) {
-    for(const FunctionSpec& spec : kFunctions) {
+    for(const FunctionSpec& spec : FUNCTIONS) {
         EXPECT_EQ(FindFunction(spec.name), &spec) << spec.name;
         EXPECT_EQ(Spec(spec.id).name, spec.name);
         EXPECT_GE(spec.min_args, 1);
-        EXPECT_TRUE(spec.max_args == kVariadic || spec.max_args >= spec.min_args) << spec.name;
+        EXPECT_TRUE(spec.max_args == VARIADIC || spec.max_args >= spec.min_args) << spec.name;
     }
     EXPECT_EQ(FindFunction("rnd"), nullptr);
     EXPECT_EQ(FindFunction(""), nullptr);
@@ -72,7 +72,7 @@ TEST(Functions, TableIsSortedAndSearchable) {
 }
 
 TEST(Functions, EveryFunctionHasAVector) {
-    for(const FunctionSpec& spec : kFunctions) {
+    for(const FunctionSpec& spec : FUNCTIONS) {
         bool found = false;
         for(const testing::FunctionVector& vector : testing::FUNCTION_VECTORS) {
             found = found || vector.name == spec.name;
@@ -115,8 +115,8 @@ TEST(Functions, VectorsFoldedAtCompileTimeAndEvaluatedAtRunTime) {
 }
 
 TEST(Functions, ArgumentCountBoundaries) {
-    for(const FunctionSpec& spec : kFunctions) {
-        const std::size_t max = spec.max_args == kVariadic ? limits::kMaxArguments : spec.max_args;
+    for(const FunctionSpec& spec : FUNCTIONS) {
+        const std::size_t max = spec.max_args == VARIADIC ? limits::MAX_ARGUMENTS : spec.max_args;
         const auto with = [&spec](std::size_t count) {
             return Call(spec.name, std::vector<std::string>(count, "1"));
         };
