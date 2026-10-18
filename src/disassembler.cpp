@@ -12,7 +12,7 @@ namespace eerie_leap::expression_engine {
 
 namespace {
 
-constexpr std::array<std::string_view, kOpCount> kOpNames{ {
+constexpr std::array<std::string_view, OP_COUNT> OP_NAMES{ {
     "PushConst",
     "PushVar",
     "Neg",
@@ -41,7 +41,7 @@ constexpr std::array<std::string_view, kOpCount> kOpNames{ {
     "End",
 } };
 
-constexpr std::size_t kOpColumnWidth = 11; // "JumpIfFalse"
+constexpr std::size_t OP_COLUMN_WIDTH = 11; // "JumpIfFalse"
 
 // Appends into a fixed buffer, silently truncating; the buffer is sized for the longest line.
 class LineWriter {
@@ -96,7 +96,7 @@ private:
 
 std::string_view Name(Op op) noexcept {
     const auto index = std::to_underlying(op);
-    return index < kOpNames.size() ? kOpNames[index] : std::string_view{ "?" };
+    return index < OP_NAMES.size() ? OP_NAMES[index] : std::string_view{ "?" };
 }
 
 namespace detail {
@@ -111,22 +111,22 @@ std::string_view FormatInstruction(const Program& program, std::size_t index, st
 
     switch(in.op) {
         case Op::PushConst:
-            line.Pad(4 + kOpColumnWidth + 1);
+            line.Pad(4 + OP_COLUMN_WIDTH + 1);
             line.Append(in.imm);
             break;
         case Op::PushVar:
-            line.Pad(4 + kOpColumnWidth + 1);
+            line.Pad(4 + OP_COLUMN_WIDTH + 1);
             line.Append(program.VariableName(in.arg));
             break;
         case Op::AndJump:
         case Op::OrJump:
         case Op::JumpIfFalse:
         case Op::Jump:
-            line.Pad(4 + kOpColumnWidth + 1);
+            line.Pad(4 + OP_COLUMN_WIDTH + 1);
             line.Append(static_cast<std::size_t>(in.arg), 0);
             break;
         case Op::Call:
-            line.Pad(4 + kOpColumnWidth + 1);
+            line.Pad(4 + OP_COLUMN_WIDTH + 1);
             line.Append(Spec(static_cast<FunctionId>(in.aux)).name);
             line.Append("/");
             line.Append(static_cast<std::size_t>(in.arg), 0);

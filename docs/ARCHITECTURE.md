@@ -31,7 +31,7 @@ together.
   `Code()`, `MaxStackDepth()`, `get_allocator()`.
 - `Limits` is an aggregate whose fields default to the compile-time caps in `limits.hpp` and are
   clamped to them (`Limits::Clamped()`), so a caller can only tighten.
-- `kFunctions` / `FindFunction` / `Spec` / `Invoke` in `functions.hpp` expose the function table.
+- `FUNCTIONS` / `FindFunction` / `Spec` / `Invoke` in `functions.hpp` expose the function table.
 - `Disassemble(program, sink)` calls the sink once per instruction with a `std::string_view` that
   lives in a stack buffer.
 
@@ -78,7 +78,7 @@ time.
 
 ## The emitter and constant folding
 
-The emitter writes into a fixed `std::array<Instruction, kMaxInstructions>` on the stack. It keeps
+The emitter writes into a fixed `std::array<Instruction, MAX_INSTRUCTIONS>` on the stack. It keeps
 an abstract **operand stack** beside the real one: an entry is either *materialized* (a value the
 code will have produced at that point) or a *pending constant* that has not been written to the
 code yet.
@@ -162,7 +162,7 @@ Only `Compile()` can construct a `Program` (private constructor, `Compile` is a 
 every program went through the emitter:
 
 - every jump target is a valid instruction index,
-- the stack never exceeds `MaxStackDepth()`, which is at most `limits::kMaxStack`, the size of the
+- the stack never exceeds `MaxStackDepth()`, which is at most `limits::MAX_STACK`, the size of the
   evaluator's local stack,
 - every `PushVar` index is below `VariableCount()`,
 - every `Call` names a real `FunctionId` with an argument count inside its range,
@@ -180,7 +180,7 @@ for it). `Compile()` has no shared state either. The function table and the erro
 
 ## Extending
 
-**A function.** Add the enumerator to `FunctionId` and the row to `kFunctions`, both in
+**A function.** Add the enumerator to `FunctionId` and the row to `FUNCTIONS`, both in
 alphabetical order (the `static_assert`s check it), add its case to `Invoke()` in
 `src/functions.cpp`, and add rows to `tests/vectors/function_vectors.hpp` (the test that every
 function has a vector fails until you do). The parser, the folder, the disassembler and the docs
@@ -189,10 +189,10 @@ table pick it up from the table.
 **A binary operator.** Add the token to `TokenKind` and the lexer's `switch`, the opcode to `Op`
 (append; the disassembler's name table and `IsBinary()` in `src/ops.hpp` must follow), its
 semantics to `ApplyBinary()`, and the row to `kBinaryOperators` in `src/parser.cpp` with its
-precedence. Add it to `kOperators` in `tests/support/expression_generator.hpp` so the property
+precedence. Add it to `OPERATORS` in `tests/support/expression_generator.hpp` so the property
 test covers it, and to the precedence table in `docs/LANGUAGE.md`.
 
-**An error code.** Append to `CompileErrorCode`, bump `kCompileErrorCodeCount`, add the
+**An error code.** Append to `CompileErrorCode`, bump `COMPILE_ERROR_CODE_COUNT`, add the
 description and the name in `src/error.cpp`, and a row in `tests/vectors/error_vectors.hpp`.
 
 **A cap.** Add it to `cmake/sources.cmake` (`EXPRESSION_ENGINE_CAPS` and its default), to

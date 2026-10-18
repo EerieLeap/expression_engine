@@ -17,7 +17,7 @@ struct BinaryOperator {
     Op op;
 };
 
-constexpr std::array<BinaryOperator, 16> kBinaryOperators{ {
+constexpr std::array<BinaryOperator, 16> BINARY_OPERATORS{ {
     { TokenKind::OrOr, 1, Op::OrJump },
     { TokenKind::AndAnd, 2, Op::AndJump },
     { TokenKind::Lt, 3, Op::Lt },
@@ -37,7 +37,7 @@ constexpr std::array<BinaryOperator, 16> kBinaryOperators{ {
 } };
 
 constexpr const BinaryOperator* FindBinary(TokenKind kind) noexcept {
-    for(const BinaryOperator& spec : kBinaryOperators) {
+    for(const BinaryOperator& spec : BINARY_OPERATORS) {
         if(spec.token == kind) {
             return &spec;
         }
@@ -94,6 +94,7 @@ Parser::Result Parser::Parse() noexcept {
     return std::unexpected(At(CompileErrorCode::UnexpectedToken, *token));
 }
 
+// NOLINTNEXTLINE(misc-no-recursion): recursive descent, depth bounded by Limits::max_nesting (Enter)
 Parser::Result Parser::ParseTernary() noexcept {
     if(const auto r = ParseBinary(1); !r) {
         return r;
@@ -106,7 +107,7 @@ Parser::Result Parser::ParseTernary() noexcept {
     if(question->kind != TokenKind::Question) {
         return {};
     }
-    (void)lexer_.Next();
+    lexer_.Skip();
 
     if(const auto r = Enter(*question); !r) {
         return r;
@@ -151,6 +152,7 @@ Parser::Result Parser::ParseTernary() noexcept {
     return {};
 }
 
+// NOLINTNEXTLINE(misc-no-recursion): recursive descent, depth bounded by Limits::max_nesting (Enter)
 Parser::Result Parser::ParseBinary(std::uint8_t min_precedence) noexcept {
     if(const auto r = ParseUnary(); !r) {
         return r;
@@ -166,7 +168,7 @@ Parser::Result Parser::ParseBinary(std::uint8_t min_precedence) noexcept {
         if(spec == nullptr || spec->precedence < min_precedence) {
             return {};
         }
-        (void)lexer_.Next();
+        lexer_.Skip();
 
         const auto next_precedence = static_cast<std::uint8_t>(spec->precedence + 1);
 
@@ -196,6 +198,7 @@ Parser::Result Parser::ParseBinary(std::uint8_t min_precedence) noexcept {
     }
 }
 
+// NOLINTNEXTLINE(misc-no-recursion): recursive descent, depth bounded by Limits::max_nesting (Enter)
 Parser::Result Parser::ParseUnary() noexcept {
     const auto token = lexer_.Peek();
     if(!token) {
@@ -205,7 +208,7 @@ Parser::Result Parser::ParseUnary() noexcept {
     if(token->kind != TokenKind::Minus && token->kind != TokenKind::Plus && token->kind != TokenKind::Tilde) {
         return ParsePower();
     }
-    (void)lexer_.Next();
+    lexer_.Skip();
 
     if(const auto r = Enter(*token); !r) {
         return r;
@@ -225,6 +228,7 @@ Parser::Result Parser::ParseUnary() noexcept {
     }
 }
 
+// NOLINTNEXTLINE(misc-no-recursion): recursive descent, depth bounded by Limits::max_nesting (Enter)
 Parser::Result Parser::ParsePower() noexcept {
     if(const auto r = ParsePrimary(); !r) {
         return r;
@@ -237,7 +241,7 @@ Parser::Result Parser::ParsePower() noexcept {
     if(token->kind != TokenKind::Caret) {
         return {};
     }
-    (void)lexer_.Next();
+    lexer_.Skip();
 
     // The exponent may carry its own sign ("2^-1") and its own "^" (right-associative).
     if(const auto r = Enter(*token); !r) {
@@ -251,6 +255,7 @@ Parser::Result Parser::ParsePower() noexcept {
     return Lift(emitter_.EmitBinary(Op::Pow), *token);
 }
 
+// NOLINTNEXTLINE(misc-no-recursion): recursive descent, depth bounded by Limits::max_nesting (Enter)
 Parser::Result Parser::ParsePrimary() noexcept {
     const auto token = lexer_.Next();
     if(!token) {
@@ -309,6 +314,7 @@ Parser::Result Parser::ParsePrimary() noexcept {
     }
 }
 
+// NOLINTNEXTLINE(misc-no-recursion): recursive descent, depth bounded by Limits::max_nesting (Enter)
 Parser::Result Parser::ParseCall(const Token& name) noexcept {
     const FunctionSpec* spec = FindFunction(lexer_.Text(name));
     if(spec == nullptr) {
@@ -323,7 +329,7 @@ Parser::Result Parser::ParseCall(const Token& name) noexcept {
         return r;
     }
 
-    const std::uint8_t max_args = spec->max_args == kVariadic ? limits_.max_arguments : spec->max_args;
+    const std::uint8_t max_args = spec->max_args == VARIADIC ? limits_.max_arguments : spec->max_args;
     std::uint8_t argc = 0;
 
     const auto first = lexer_.Peek();
@@ -332,7 +338,7 @@ Parser::Result Parser::ParseCall(const Token& name) noexcept {
     }
 
     if(first->kind == TokenKind::RParen) {
-        (void)lexer_.Next();
+        lexer_.Skip();
     } else {
         for(;;) {
             if(argc >= max_args) {

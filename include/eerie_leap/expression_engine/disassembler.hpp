@@ -13,7 +13,7 @@ namespace eerie_leap::expression_engine {
 
 namespace detail {
 
-inline constexpr std::size_t kDisassemblyLineCapacity = 96;
+inline constexpr std::size_t DISASSEMBLY_LINE_CAPACITY = 96;
 
 // Writes "<index> <opcode> <operand>" for one instruction into `buffer` and returns the part written.
 [[nodiscard]] std::string_view
@@ -24,8 +24,12 @@ FormatInstruction(const Program& program, std::size_t index, std::span<char> buf
 // Calls `sink` once per instruction with a line such as "  3 Call        sum/2". No allocation;
 // each line lives in a stack buffer until the sink returns.
 template<std::invocable<std::string_view> Sink>
-void Disassemble(const Program& program, Sink&& sink) {
-    std::array<char, detail::kDisassemblyLineCapacity> buffer{};
+void Disassemble(
+    const Program& program,
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): called once per instruction, forwarding would reuse a moved sink
+    Sink&& sink
+) {
+    std::array<char, detail::DISASSEMBLY_LINE_CAPACITY> buffer{};
     const std::size_t count = program.Code().size();
     for(std::size_t index = 0; index < count; ++index) {
         std::invoke(sink, detail::FormatInstruction(program, index, buffer));

@@ -13,6 +13,7 @@ std::atomic<std::size_t> allocations{ 0 };
 
 void* Allocate(std::size_t size) {
     allocations.fetch_add(1, std::memory_order_relaxed);
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc): replacement global allocation functions are built on malloc/free
     void* p = std::malloc(size == 0 ? 1 : size);
     if(p == nullptr) {
         std::abort();
@@ -64,33 +65,41 @@ void* operator new[](std::size_t size, std::align_val_t alignment) {
 }
 
 void operator delete(void* p) noexcept {
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc): replacement global allocation functions are built on malloc/free
     std::free(p);
 }
 
 void operator delete[](void* p) noexcept {
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc): replacement global allocation functions are built on malloc/free
     std::free(p);
 }
 
 void operator delete(void* p, std::size_t) noexcept {
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc): replacement global allocation functions are built on malloc/free
     std::free(p);
 }
 
 void operator delete[](void* p, std::size_t) noexcept {
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc): replacement global allocation functions are built on malloc/free
     std::free(p);
 }
 
 void operator delete(void* p, std::align_val_t) noexcept {
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc): replacement global allocation functions are built on malloc/free
     std::free(p);
 }
 
 void operator delete[](void* p, std::align_val_t) noexcept {
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc): replacement global allocation functions are built on malloc/free
     std::free(p);
 }
 
 void operator delete(void* p, std::size_t, std::align_val_t) noexcept {
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc): replacement global allocation functions are built on malloc/free
     std::free(p);
 }
 
 void operator delete[](void* p, std::size_t, std::align_val_t) noexcept {
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc): replacement global allocation functions are built on malloc/free
     std::free(p);
 }

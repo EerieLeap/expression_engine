@@ -23,7 +23,7 @@ extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t* data, std::size_t size
         return 0;
     }
 
-    std::array<ee::Value, ee::limits::kMaxVariables> variables{};
+    std::array<ee::Value, ee::limits::MAX_VARIABLES> variables{};
     for(std::size_t i = 0; i < variables.size() && i * sizeof(float) + sizeof(float) <= size; ++i) {
         std::memcpy(&variables[i], data + i * sizeof(float), sizeof(float));
     }

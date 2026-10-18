@@ -31,7 +31,7 @@ TEST(Disassembler, FormatsEveryOperandKind) {
 }
 
 TEST(Disassembler, FormatsSpecialValues) {
-    const auto Line = [](std::string_view text) {
+    const auto first_line = [](std::string_view text) {
         const auto program = Compile(text);
         if(!program) {
             ADD_FAILURE() << text;
@@ -45,23 +45,23 @@ TEST(Disassembler, FormatsSpecialValues) {
         });
         return first;
     };
-    EXPECT_EQ(Line("1 / 0"), "  0 PushConst   inf");
-    EXPECT_EQ(Line("-1 / 0"), "  0 PushConst   -inf");
-    EXPECT_EQ(Line("0 / 0"), "  0 PushConst   nan");
-    EXPECT_EQ(Line("1e10"), "  0 PushConst   1e+10");
-    EXPECT_EQ(Line("0.1"), "  0 PushConst   0.1");
-    EXPECT_EQ(Line("0xFFFFFFFF"), "  0 PushConst   -1");
+    EXPECT_EQ(first_line("1 / 0"), "  0 PushConst   inf");
+    EXPECT_EQ(first_line("-1 / 0"), "  0 PushConst   -inf");
+    EXPECT_EQ(first_line("0 / 0"), "  0 PushConst   nan");
+    EXPECT_EQ(first_line("1e10"), "  0 PushConst   1e+10");
+    EXPECT_EQ(first_line("0.1"), "  0 PushConst   0.1");
+    EXPECT_EQ(first_line("0xFFFFFFFF"), "  0 PushConst   -1");
 }
 
 TEST(Disassembler, NamesEveryOpcode) {
     std::set<std::string_view> names;
-    for(std::size_t i = 0; i < kOpCount; ++i) {
+    for(std::size_t i = 0; i < OP_COUNT; ++i) {
         const std::string_view name = Name(static_cast<Op>(i));
         EXPECT_FALSE(name.empty()) << i;
         EXPECT_NE(name, "?") << i;
         names.insert(name);
     }
-    EXPECT_EQ(names.size(), kOpCount);
+    EXPECT_EQ(names.size(), OP_COUNT);
     EXPECT_EQ(Name(static_cast<Op>(255)), "?");
     EXPECT_EQ(Name(Op::End), "End");
     EXPECT_EQ(Name(Op::JumpIfFalse), "JumpIfFalse");

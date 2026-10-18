@@ -105,18 +105,18 @@ TEST(Lexer, ParsesDecimalNumbers) {
         std::uint16_t length;
     };
     const Case cases[]{
-        { "1", 1.0f, 1 },
-        { "1.", 1.0f, 2 },
-        { ".5", 0.5f, 2 },
-        { "1e3", 1000.0f, 3 },
-        { "1E-3", 0.001f, 4 },
-        { "2.5e+2", 250.0f, 6 },
-        { "007", 7.0f, 3 },
-        { "3.1415927", 3.1415927f, 9 },
+        { "1", 1.0F, 1 },
+        { "1.", 1.0F, 2 },
+        { ".5", 0.5F, 2 },
+        { "1e3", 1000.0F, 3 },
+        { "1E-3", 0.001F, 4 },
+        { "2.5e+2", 250.0F, 6 },
+        { "007", 7.0F, 3 },
+        { "3.1415927", 3.1415927F, 9 }, // NOLINT(modernize-use-std-numbers): lexer input text, not a use of pi
     };
     for(const Case& c : cases) {
         const auto tokens = Tokenize(c.text);
-        ASSERT_EQ(tokens.size(), 2u) << c.text;
+        ASSERT_EQ(tokens.size(), 2U) << c.text;
         EXPECT_EQ(tokens[0].kind, TokenKind::Number) << c.text;
         EXPECT_EQ(tokens[0].value, c.value) << c.text;
         EXPECT_EQ(tokens[0].length, c.length) << c.text;
@@ -129,19 +129,19 @@ TEST(Lexer, ParsesIntegerLiterals) {
         Value value;
     };
     const Case cases[]{
-        { "0xFF", 255.0f },
-        { "0XfF", 255.0f },
-        { "0x0", 0.0f },
-        { "0b1010", 10.0f },
-        { "0B11", 3.0f },
-        { "0xFFFFFFFF", -1.0f },
-        { "0x80000000", -2147483648.0f },
-        { "0x00FFFFFF", 16777215.0f },
-        { "0xFFFF0000", -65536.0f },
+        { "0xFF", 255.0F },
+        { "0XfF", 255.0F },
+        { "0x0", 0.0F },
+        { "0b1010", 10.0F },
+        { "0B11", 3.0F },
+        { "0xFFFFFFFF", -1.0F },
+        { "0x80000000", -2147483648.0F },
+        { "0x00FFFFFF", 16777215.0F },
+        { "0xFFFF0000", -65536.0F },
     };
     for(const Case& c : cases) {
         const auto tokens = Tokenize(c.text);
-        ASSERT_EQ(tokens.size(), 2u) << c.text;
+        ASSERT_EQ(tokens.size(), 2U) << c.text;
         EXPECT_EQ(tokens[0].kind, TokenKind::Number) << c.text;
         EXPECT_EQ(tokens[0].value, c.value) << c.text;
         EXPECT_EQ(tokens[0].length, c.text.size()) << c.text;
@@ -162,22 +162,22 @@ TEST(Lexer, RejectsBadIntegerLiterals) {
 
 TEST(Lexer, LeavesTrailingLettersAsIdentifiers) {
     auto tokens = Tokenize("1e");
-    ASSERT_EQ(tokens.size(), 3u);
+    ASSERT_EQ(tokens.size(), 3U);
     EXPECT_EQ(tokens[0].kind, TokenKind::Number);
     EXPECT_EQ(tokens[0].length, 1);
     EXPECT_EQ(tokens[1].kind, TokenKind::Identifier);
     EXPECT_EQ(tokens[1].position, 1);
 
     tokens = Tokenize("12ab");
-    ASSERT_EQ(tokens.size(), 3u);
-    EXPECT_EQ(tokens[0].value, 12.0f);
+    ASSERT_EQ(tokens.size(), 3U);
+    EXPECT_EQ(tokens[0].value, 12.0F);
     EXPECT_EQ(tokens[1].kind, TokenKind::Identifier);
     EXPECT_EQ(tokens[1].position, 2);
     EXPECT_EQ(tokens[1].length, 2);
 
     tokens = Tokenize("0x10g");
-    ASSERT_EQ(tokens.size(), 3u);
-    EXPECT_EQ(tokens[0].value, 16.0f);
+    ASSERT_EQ(tokens.size(), 3U);
+    EXPECT_EQ(tokens[0].value, 16.0F);
     EXPECT_EQ(tokens[1].kind, TokenKind::Identifier);
 }
 
@@ -221,7 +221,7 @@ TEST(Lexer, PeekDoesNotConsume) {
 
 TEST(Lexer, SkipsEveryKindOfWhitespace) {
     const auto tokens = Tokenize(" \t\n\r\v\f1");
-    ASSERT_EQ(tokens.size(), 2u);
+    ASSERT_EQ(tokens.size(), 2U);
     EXPECT_EQ(tokens[0].position, 6);
 }
 

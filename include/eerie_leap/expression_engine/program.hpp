@@ -26,7 +26,7 @@ Compile(std::string_view text, std::pmr::memory_resource* resource, const Limits
 // A compiled expression: bytecode plus the names of the variables it reads, in index order.
 //
 // Only Compile() constructs a Program. That is the invariant Evaluate() relies on: every jump
-// target is in range, the stack never exceeds MaxStackDepth() <= limits::kMaxStack, every PushVar
+// target is in range, the stack never exceeds MaxStackDepth() <= limits::MAX_STACK, every PushVar
 // index is below VariableCount() and every Call has a valid function and argument count, so the
 // evaluation loop has no bounds checks.
 //
@@ -70,7 +70,7 @@ public:
 
     [[nodiscard]] std::optional<std::size_t> VariableIndex(std::string_view name) const noexcept;
 
-    // Upper bound of the evaluation stack this program uses; at most limits::kMaxStack.
+    // Upper bound of the evaluation stack this program uses; at most limits::MAX_STACK.
     [[nodiscard]] std::uint8_t MaxStackDepth() const noexcept {
         return max_stack_;
     }

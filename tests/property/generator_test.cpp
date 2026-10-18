@@ -25,7 +25,7 @@ bool IsLimitError(CompileErrorCode code) {
 } // namespace
 
 TEST(Generator, BothRenderingsEvaluateToTheGeneratedValue) {
-    const testing::Binding bindings[]{ { "x", 2.5f }, { "y", -1.25f }, { "z", 7.0f }, { "w", 0.0f } };
+    const testing::Binding bindings[]{ { "x", 2.5F }, { "y", -1.25F }, { "z", 7.0F }, { "w", 0.0F } };
     testing::ExpressionGenerator generator(12345, bindings);
 
     std::size_t total = 0;
@@ -59,6 +59,7 @@ TEST(Generator, BothRenderingsEvaluateToTheGeneratedValue) {
         }
     }
 
+    // NOLINTNEXTLINE(modernize-use-std-print): <print> needs libstdc++ 14; the library supports GCC 12+
     std::printf("generated %zu renderings, %zu skipped for exceeding a limit\n", total, skipped);
     EXPECT_LT(skipped * 10, total);
 }

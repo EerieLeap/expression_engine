@@ -15,7 +15,7 @@ Value Program::Evaluate(std::span<const Value> variables) const noexcept {
     }
 
     // Sized by the cap, not by max_stack_, so the frame is the same for every program.
-    std::array<Value, limits::kMaxStack> stack{};
+    std::array<Value, limits::MAX_STACK> stack{};
     std::size_t sp = 0;
     const Instruction* pc = code_.data();
 
@@ -57,21 +57,21 @@ Value Program::Evaluate(std::span<const Value> variables) const noexcept {
                 break;
 
             case Op::AndJump:
-                if(stack[--sp] == 0.0f) {
-                    stack[sp++] = 0.0f;
+                if(stack[--sp] == 0.0F) {
+                    stack[sp++] = 0.0F;
                     pc = code_.data() + in.arg;
                 }
                 break;
 
             case Op::OrJump:
-                if(stack[--sp] != 0.0f) {
-                    stack[sp++] = 1.0f;
+                if(stack[--sp] != 0.0F) {
+                    stack[sp++] = 1.0F;
                     pc = code_.data() + in.arg;
                 }
                 break;
 
             case Op::JumpIfFalse:
-                if(stack[--sp] == 0.0f) {
+                if(stack[--sp] == 0.0F) {
                     pc = code_.data() + in.arg;
                 }
                 break;

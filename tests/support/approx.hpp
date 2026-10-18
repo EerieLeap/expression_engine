@@ -21,7 +21,7 @@ namespace eerie_leap::expression_engine::testing {
 // Distance in units in the last place, for the few functions whose libm path may differ.
 [[nodiscard]] inline std::uint32_t UlpDistance(Value a, Value b) noexcept {
     if(std::isnan(a) || std::isnan(b)) {
-        return std::isnan(a) && std::isnan(b) ? 0u : 0xFFFFFFFFu;
+        return std::isnan(a) && std::isnan(b) ? 0U : 0xFFFFFFFFU;
     }
     if(a == b) {
         return 0;
@@ -29,7 +29,7 @@ namespace eerie_leap::expression_engine::testing {
     const auto ia = std::bit_cast<std::int32_t>(a);
     const auto ib = std::bit_cast<std::int32_t>(b);
     if((ia < 0) != (ib < 0)) {
-        return 0xFFFFFFFFu;
+        return 0xFFFFFFFFU;
     }
     return static_cast<std::uint32_t>(std::abs(static_cast<std::int64_t>(ia) - static_cast<std::int64_t>(ib)));
 }

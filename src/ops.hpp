@@ -34,17 +34,17 @@ namespace eerie_leap::expression_engine::detail {
         case Op::Pow:
             return std::pow(a, b);
         case Op::Lt:
-            return a < b ? 1.0f : 0.0f;
+            return a < b ? 1.0F : 0.0F;
         case Op::Gt:
-            return a > b ? 1.0f : 0.0f;
+            return a > b ? 1.0F : 0.0F;
         case Op::Le:
-            return a <= b ? 1.0f : 0.0f;
+            return a <= b ? 1.0F : 0.0F;
         case Op::Ge:
-            return a >= b ? 1.0f : 0.0f;
+            return a >= b ? 1.0F : 0.0F;
         case Op::Eq:
-            return a == b ? 1.0f : 0.0f;
+            return a == b ? 1.0F : 0.0F;
         case Op::Ne:
-            return a != b ? 1.0f : 0.0f;
+            return a != b ? 1.0F : 0.0F;
         case Op::BitAnd:
             return BitAnd(a, b);
         case Op::BitOr:
@@ -65,7 +65,7 @@ namespace eerie_leap::expression_engine::detail {
         case Op::BitNot:
             return BitNot(a);
         case Op::ToBool:
-            return a != 0.0f ? 1.0f : 0.0f;
+            return a != 0.0F ? 1.0F : 0.0F;
         default:
             return std::numeric_limits<Value>::quiet_NaN();
     }

@@ -21,7 +21,7 @@ namespace eerie_leap::expression_engine::testing {
 
 // Defeats compile-time evaluation of the <cmath> call that receives the result.
 inline Value Runtime(Value value) {
-    volatile Value escaped = value;
+    const volatile Value escaped = value;
     return escaped;
 }
 
@@ -32,47 +32,48 @@ struct FunctionVector {
     std::uint32_t ulps = 0;
 };
 
-inline const std::array<FunctionVector, 40> kFunctionVectors{ {
-    { "abs", { -3.0f, kNaN, kNaN }, 3.0f },
-    { "acos", { 0.5f, kNaN, kNaN }, std::acos(Runtime(0.5f)) },
-    { "acosh", { 2.0f, kNaN, kNaN }, std::acosh(Runtime(2.0f)), 2 },
-    { "asin", { 0.5f, kNaN, kNaN }, std::asin(Runtime(0.5f)) },
-    { "asinh", { 1.0f, kNaN, kNaN }, std::asinh(Runtime(1.0f)), 2 },
-    { "atan", { 1.0f, kNaN, kNaN }, std::atan(Runtime(1.0f)) },
-    { "atan2", { 1.0f, 2.0f, kNaN }, std::atan2(Runtime(1.0f), Runtime(2.0f)) },
-    { "atanh", { 0.5f, kNaN, kNaN }, std::atanh(Runtime(0.5f)), 2 },
-    { "avg", { 1.0f, 2.0f, 4.0f }, 7.0f / 3.0f },
-    { "cos", { 1.0f, kNaN, kNaN }, std::cos(Runtime(1.0f)) },
-    { "cosh", { 1.0f, kNaN, kNaN }, std::cosh(Runtime(1.0f)), 2 },
-    { "exp", { 2.0f, kNaN, kNaN }, std::exp(Runtime(2.0f)) },
-    { "ln", { 10.0f, kNaN, kNaN }, std::log(Runtime(10.0f)) },
-    { "log", { 10.0f, kNaN, kNaN }, std::log(Runtime(10.0f)) },
-    { "log10", { 1000.0f, kNaN, kNaN }, std::log10(Runtime(1000.0f)) },
-    { "log2", { 8.0f, kNaN, kNaN }, std::log(Runtime(8.0f)) / std::log(Runtime(2.0f)), 2 },
-    { "max", { 3.0f, 1.0f, 2.0f }, 3.0f },
-    { "min", { 3.0f, 1.0f, 2.0f }, 1.0f },
-    { "rint", { 2.5f, kNaN, kNaN }, 3.0f },
-    { "rint", { -2.5f, kNaN, kNaN }, -2.0f },
-    { "rint", { 2.4f, kNaN, kNaN }, 2.0f },
-    { "rint", { -0.4f, kNaN, kNaN }, 0.0f },
-    { "sign", { -3.0f, kNaN, kNaN }, -1.0f },
-    { "sign", { 0.0f, kNaN, kNaN }, 0.0f },
-    { "sign", { 2.5f, kNaN, kNaN }, 1.0f },
-    { "sign", { kNaN, kNaN, kNaN }, 0.0f },
-    { "sin", { 1.0f, kNaN, kNaN }, std::sin(Runtime(1.0f)) },
-    { "sinh", { 1.0f, kNaN, kNaN }, std::sinh(Runtime(1.0f)), 2 },
-    { "sqrt", { 2.0f, kNaN, kNaN }, std::sqrt(Runtime(2.0f)) },
-    { "sqrt", { -1.0f, kNaN, kNaN }, kNaN },
-    { "sum", { 1.0f, 2.0f, 3.5f }, 6.5f },
-    { "sum", { 5.0f, kNaN, kNaN }, 5.0f },
-    { "tan", { 1.0f, kNaN, kNaN }, std::tan(Runtime(1.0f)) },
-    { "tanh", { 1.0f, kNaN, kNaN }, std::tanh(Runtime(1.0f)), 2 },
-    { "xor", { 6.0f, 3.0f, kNaN }, 5.0f },
-    { "xor", { -1.0f, 255.0f, kNaN }, -256.0f },
-    { "log", { 0.0f, kNaN, kNaN }, -kInf },
-    { "min", { 5.0f, kNaN, kNaN }, 5.0f },
-    { "max", { -1.0f, -2.0f, kNaN }, -1.0f },
-    { "avg", { 1.0f, 2.0f, kNaN }, 1.5f },
+// NOLINTNEXTLINE(bugprone-throwing-static-initialization): <cmath> functions are not declared noexcept, but none of them throws
+inline const std::array<FunctionVector, 40> FUNCTION_VECTORS{ {
+    { "abs", { -3.0F, NAN_VALUE, NAN_VALUE }, 3.0F },
+    { "acos", { 0.5F, NAN_VALUE, NAN_VALUE }, std::acos(Runtime(0.5F)) },
+    { "acosh", { 2.0F, NAN_VALUE, NAN_VALUE }, std::acosh(Runtime(2.0F)), 2 },
+    { "asin", { 0.5F, NAN_VALUE, NAN_VALUE }, std::asin(Runtime(0.5F)) },
+    { "asinh", { 1.0F, NAN_VALUE, NAN_VALUE }, std::asinh(Runtime(1.0F)), 2 },
+    { "atan", { 1.0F, NAN_VALUE, NAN_VALUE }, std::atan(Runtime(1.0F)) },
+    { "atan2", { 1.0F, 2.0F, NAN_VALUE }, std::atan2(Runtime(1.0F), Runtime(2.0F)) },
+    { "atanh", { 0.5F, NAN_VALUE, NAN_VALUE }, std::atanh(Runtime(0.5F)), 2 },
+    { "avg", { 1.0F, 2.0F, 4.0F }, 7.0F / 3.0F },
+    { "cos", { 1.0F, NAN_VALUE, NAN_VALUE }, std::cos(Runtime(1.0F)) },
+    { "cosh", { 1.0F, NAN_VALUE, NAN_VALUE }, std::cosh(Runtime(1.0F)), 2 },
+    { "exp", { 2.0F, NAN_VALUE, NAN_VALUE }, std::exp(Runtime(2.0F)) },
+    { "ln", { 10.0F, NAN_VALUE, NAN_VALUE }, std::log(Runtime(10.0F)) },
+    { "log", { 10.0F, NAN_VALUE, NAN_VALUE }, std::log(Runtime(10.0F)) },
+    { "log10", { 1000.0F, NAN_VALUE, NAN_VALUE }, std::log10(Runtime(1000.0F)) },
+    { "log2", { 8.0F, NAN_VALUE, NAN_VALUE }, std::log(Runtime(8.0F)) / std::log(Runtime(2.0F)), 2 },
+    { "max", { 3.0F, 1.0F, 2.0F }, 3.0F },
+    { "min", { 3.0F, 1.0F, 2.0F }, 1.0F },
+    { "rint", { 2.5F, NAN_VALUE, NAN_VALUE }, 3.0F },
+    { "rint", { -2.5F, NAN_VALUE, NAN_VALUE }, -2.0F },
+    { "rint", { 2.4F, NAN_VALUE, NAN_VALUE }, 2.0F },
+    { "rint", { -0.4F, NAN_VALUE, NAN_VALUE }, 0.0F },
+    { "sign", { -3.0F, NAN_VALUE, NAN_VALUE }, -1.0F },
+    { "sign", { 0.0F, NAN_VALUE, NAN_VALUE }, 0.0F },
+    { "sign", { 2.5F, NAN_VALUE, NAN_VALUE }, 1.0F },
+    { "sign", { NAN_VALUE, NAN_VALUE, NAN_VALUE }, 0.0F },
+    { "sin", { 1.0F, NAN_VALUE, NAN_VALUE }, std::sin(Runtime(1.0F)) },
+    { "sinh", { 1.0F, NAN_VALUE, NAN_VALUE }, std::sinh(Runtime(1.0F)), 2 },
+    { "sqrt", { 2.0F, NAN_VALUE, NAN_VALUE }, std::sqrt(Runtime(2.0F)) },
+    { "sqrt", { -1.0F, NAN_VALUE, NAN_VALUE }, NAN_VALUE },
+    { "sum", { 1.0F, 2.0F, 3.5F }, 6.5F },
+    { "sum", { 5.0F, NAN_VALUE, NAN_VALUE }, 5.0F },
+    { "tan", { 1.0F, NAN_VALUE, NAN_VALUE }, std::tan(Runtime(1.0F)) },
+    { "tanh", { 1.0F, NAN_VALUE, NAN_VALUE }, std::tanh(Runtime(1.0F)), 2 },
+    { "xor", { 6.0F, 3.0F, NAN_VALUE }, 5.0F },
+    { "xor", { -1.0F, 255.0F, NAN_VALUE }, -256.0F },
+    { "log", { 0.0F, NAN_VALUE, NAN_VALUE }, -INF_VALUE },
+    { "min", { 5.0F, NAN_VALUE, NAN_VALUE }, 5.0F },
+    { "max", { -1.0F, -2.0F, NAN_VALUE }, -1.0F },
+    { "avg", { 1.0F, 2.0F, NAN_VALUE }, 1.5F },
 } };
 
 } // namespace eerie_leap::expression_engine::testing

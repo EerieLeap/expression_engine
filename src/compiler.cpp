@@ -11,22 +11,22 @@
 namespace eerie_leap::expression_engine {
 
 std::expected<Program, CompileError>
-Compile(std::string_view text, std::pmr::memory_resource* resource, const Limits& requested) noexcept {
-    const Limits limits = requested.Clamped();
+Compile(std::string_view text, std::pmr::memory_resource* resource, const Limits& limits) noexcept {
+    const Limits clamped = limits.Clamped();
 
     if(text.find_first_not_of(" \t\n\r\v\f") == std::string_view::npos) {
         return std::unexpected(CompileError{ CompileErrorCode::Empty, 0, 0 });
     }
-    if(text.size() > limits.max_length) {
-        const std::size_t excess = std::min<std::size_t>(text.size() - limits.max_length, 65535);
+    if(text.size() > clamped.max_length) {
+        const std::size_t excess = std::min<std::size_t>(text.size() - clamped.max_length, 65535);
         return std::unexpected(
-            CompileError{ CompileErrorCode::TooLong, limits.max_length, static_cast<std::uint16_t>(excess) }
+            CompileError{ CompileErrorCode::TooLong, clamped.max_length, static_cast<std::uint16_t>(excess) }
         );
     }
 
     detail::Lexer lexer(text);
-    detail::Emitter emitter(text, limits);
-    detail::Parser parser(lexer, emitter, limits);
+    detail::Emitter emitter(text, clamped);
+    detail::Parser parser(lexer, emitter, clamped);
 
     if(const auto r = parser.Parse(); !r) {
         return std::unexpected(r.error());
@@ -36,7 +36,7 @@ Compile(std::string_view text, std::pmr::memory_resource* resource, const Limits
     }
 
     // The only allocations of a compilation: the code, the name table and the symbols.
-    const auto build = [&]() -> Program {
+    const auto build = [&] -> Program {
         Program program{ Program::allocator_type{ resource } };
 
         const auto code = emitter.Code();
@@ -60,7 +60,7 @@ Compile(std::string_view text, std::pmr::memory_resource* resource, const Limits
         return program;
     };
 
-#if defined(__cpp_exceptions)
+#ifdef __cpp_exceptions
     try {
         return build();
     } catch(...) {

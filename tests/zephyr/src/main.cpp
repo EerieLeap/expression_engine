@@ -55,7 +55,7 @@ std::string Literal(ee::Value value) {
 ZTEST_SUITE(expression_engine, NULL, NULL, NULL, NULL, NULL);
 
 ZTEST(expression_engine, test_evaluation_vectors) {
-    for(const eet::EvaluationVector& vector : eet::kEvaluationVectors) {
+    for(const eet::EvaluationVector& vector : eet::EVALUATION_VECTORS) {
         const auto program = ee::Compile(vector.expression);
         zassert_true(
             program.has_value(), "\"%.*s\" failed to compile: %.*s", static_cast<int>(vector.expression.size()),
@@ -73,7 +73,7 @@ ZTEST(expression_engine, test_evaluation_vectors) {
 }
 
 ZTEST(expression_engine, test_error_vectors) {
-    for(const eet::ErrorVector& vector : eet::kErrorVectors) {
+    for(const eet::ErrorVector& vector : eet::ERROR_VECTORS) {
         const auto program = ee::Compile(vector.expression);
         zassert_false(
             program.has_value(), "\"%.*s\" compiled", static_cast<int>(vector.expression.size()),
@@ -90,12 +90,12 @@ ZTEST(expression_engine, test_error_vectors) {
 }
 
 ZTEST(expression_engine, test_function_vectors) {
-    for(const eet::FunctionVector& vector : eet::kFunctionVectors) {
+    for(const eet::FunctionVector& vector : eet::FUNCTION_VECTORS) {
         const ee::FunctionSpec* spec = ee::FindFunction(vector.name);
         zassert_not_null(spec);
 
         std::size_t argc = spec->min_args;
-        if(spec->max_args == ee::kVariadic) {
+        if(spec->max_args == ee::VARIADIC) {
             argc = 0;
             while(argc < vector.args.size() && !std::isnan(vector.args[argc])) {
                 ++argc;
@@ -135,19 +135,19 @@ ZTEST(expression_engine, test_function_vectors) {
 }
 
 ZTEST(expression_engine, test_limits_at_the_caps) {
-    const std::string open(ee::limits::kMaxNesting, '(');
-    const std::string close(ee::limits::kMaxNesting, ')');
+    const std::string open(ee::limits::MAX_NESTING, '(');
+    const std::string close(ee::limits::MAX_NESTING, ')');
     zassert_true(ee::Compile(open + "1" + close).has_value());
     const auto too_deep = ee::Compile("(" + open + "1" + close + ")");
     zassert_false(too_deep.has_value());
     zassert_equal(too_deep.error().code, ee::CompileErrorCode::NestingTooDeep);
 
     std::string text;
-    for(std::size_t i = 0; i < ee::limits::kMaxVariables; ++i) {
+    for(std::size_t i = 0; i < ee::limits::MAX_VARIABLES; ++i) {
         text += (i == 0 ? "v" : "+v") + std::to_string(i);
     }
     zassert_true(ee::Compile(text).has_value());
-    const auto too_many = ee::Compile(text + "+v" + std::to_string(ee::limits::kMaxVariables));
+    const auto too_many = ee::Compile(text + "+v" + std::to_string(ee::limits::MAX_VARIABLES));
     zassert_false(too_many.has_value());
     zassert_equal(too_many.error().code, ee::CompileErrorCode::TooManyVariables);
 }

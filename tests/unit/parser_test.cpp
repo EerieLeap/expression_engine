@@ -149,7 +149,7 @@ TEST(Parser, ConstantAtJumpTargetIsNotFoldedIntoFollowingOperator) {
     );
     const auto program = Compile("(0 ? 2 : 3) + 4");
     ASSERT_TRUE(program);
-    EXPECT_EQ(program->Evaluate({}), 7.0f);
+    EXPECT_EQ(program->Evaluate({}), 7.0F);
 }
 
 TEST(Parser, CallsWithMixedArguments) {

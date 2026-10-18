@@ -16,7 +16,7 @@
 namespace eerie_leap::expression_engine {
 
 TEST(Compiler, ReportsEveryErrorVector) {
-    for(const testing::ErrorVector& vector : testing::kErrorVectors) {
+    for(const testing::ErrorVector& vector : testing::ERROR_VECTORS) {
         const auto program = Compile(vector.expression);
         ASSERT_FALSE(program) << "\"" << vector.expression << "\" compiled";
         EXPECT_EQ(program.error(), vector.error) << "\"" << vector.expression << "\"";
@@ -26,26 +26,26 @@ TEST(Compiler, ReportsEveryErrorVector) {
 TEST(Compiler, DescribesEveryErrorCode) {
     std::set<std::string_view> descriptions;
     std::set<std::string_view> names;
-    for(std::size_t i = 0; i < kCompileErrorCodeCount; ++i) {
+    for(std::size_t i = 0; i < COMPILE_ERROR_CODE_COUNT; ++i) {
         const auto code = static_cast<CompileErrorCode>(i);
         EXPECT_FALSE(Describe(code).empty());
         EXPECT_FALSE(Name(code).empty());
         descriptions.insert(Describe(code));
         names.insert(Name(code));
     }
-    EXPECT_EQ(descriptions.size(), kCompileErrorCodeCount);
-    EXPECT_EQ(names.size(), kCompileErrorCodeCount);
+    EXPECT_EQ(descriptions.size(), COMPILE_ERROR_CODE_COUNT);
+    EXPECT_EQ(names.size(), COMPILE_ERROR_CODE_COUNT);
     EXPECT_EQ(Describe(static_cast<CompileErrorCode>(200)), "unknown error");
 }
 
 TEST(Compiler, RejectsTextLongerThanMaxLength) {
-    const std::string exact(limits::kMaxLength - 1, ' ');
+    const std::string exact(limits::MAX_LENGTH - 1, ' ');
     EXPECT_TRUE(Compile(exact + "1"));
 
-    const std::string over(limits::kMaxLength, ' ');
+    const std::string over(limits::MAX_LENGTH, ' ');
     const auto program = Compile(over + "1");
     ASSERT_FALSE(program);
-    EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::TooLong, limits::kMaxLength, 1 }));
+    EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::TooLong, limits::MAX_LENGTH, 1 }));
 }
 
 TEST(Compiler, ClampsLimitsToTheCaps) {
@@ -57,7 +57,7 @@ TEST(Compiler, ClampsLimitsToTheCaps) {
         .max_arguments = 255 };
     EXPECT_EQ(huge.Clamped(), Limits{});
 
-    const std::string over(limits::kMaxLength, ' ');
+    const std::string over(limits::MAX_LENGTH, ' ');
     const auto program = Compile(over + "1", std::pmr::get_default_resource(), huge);
     ASSERT_FALSE(program);
     EXPECT_EQ(program.error().code, CompileErrorCode::TooLong);
@@ -65,13 +65,13 @@ TEST(Compiler, ClampsLimitsToTheCaps) {
 
 TEST(Compiler, TooManyVariablesAtTheCap) {
     std::string text;
-    for(std::size_t i = 0; i < limits::kMaxVariables; ++i) {
+    for(std::size_t i = 0; i < limits::MAX_VARIABLES; ++i) {
         text += (i == 0 ? "v" : "+v") + std::to_string(i);
     }
     EXPECT_TRUE(Compile(text)) << text;
 
     const auto position = static_cast<Position>(text.size() + 1);
-    text += "+v" + std::to_string(limits::kMaxVariables);
+    text += "+v" + std::to_string(limits::MAX_VARIABLES);
     const auto program = Compile(text);
     ASSERT_FALSE(program);
     EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::TooManyVariables, position, 3 }));
@@ -79,14 +79,14 @@ TEST(Compiler, TooManyVariablesAtTheCap) {
 
 TEST(Compiler, TooManyInstructionsAtTheCap) {
     // "x" then "+x" n times is 1 + 2n instructions plus End.
-    const std::size_t fits = (limits::kMaxInstructions - 2) / 2;
+    const std::size_t fits = (limits::MAX_INSTRUCTIONS - 2) / 2;
     std::string text = "x";
     for(std::size_t i = 0; i < fits; ++i) {
         text += "+x";
     }
     const auto ok = Compile(text);
     ASSERT_TRUE(ok);
-    EXPECT_EQ(ok->Code().size(), limits::kMaxInstructions);
+    EXPECT_EQ(ok->Code().size(), limits::MAX_INSTRUCTIONS);
 
     const auto position = static_cast<Position>(text.size());
     text += "+x";
@@ -96,33 +96,33 @@ TEST(Compiler, TooManyInstructionsAtTheCap) {
 }
 
 TEST(Compiler, NestingTooDeepAtTheCap) {
-    const std::string open(limits::kMaxNesting, '(');
-    const std::string close(limits::kMaxNesting, ')');
+    const std::string open(limits::MAX_NESTING, '(');
+    const std::string close(limits::MAX_NESTING, ')');
     EXPECT_TRUE(Compile(open + "1" + close));
 
     const auto program = Compile("(" + open + "1" + close + ")");
     ASSERT_FALSE(program);
     EXPECT_EQ(
         program.error(),
-        (CompileError{ CompileErrorCode::NestingTooDeep, static_cast<Position>(limits::kMaxNesting), 1 })
+        (CompileError{ CompileErrorCode::NestingTooDeep, static_cast<Position>(limits::MAX_NESTING), 1 })
     );
 }
 
 TEST(Compiler, StackTooDeepAtTheCap) {
     // x+(x+(x+(...(x+x)...))) keeps every x on the stack until the innermost addition.
     std::string text;
-    for(std::size_t i = 0; i < limits::kMaxStack; ++i) {
+    for(std::size_t i = 0; i < limits::MAX_STACK; ++i) {
         text += "x+(";
     }
     const auto position = static_cast<Position>(text.size());
-    text += "x+x" + std::string(limits::kMaxStack, ')');
+    text += "x+x" + std::string(limits::MAX_STACK, ')');
     const auto program = Compile(text);
     ASSERT_FALSE(program);
     EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::StackTooDeep, position, 1 }));
 }
 
 TEST(Compiler, HonoursLoweredLimits) {
-    const auto resource = std::pmr::get_default_resource();
+    auto* const resource = std::pmr::get_default_resource();
 
     EXPECT_TRUE(Compile("x * 4", resource, { .max_instructions = 4 }));
     auto program = Compile("x * 4 + 1.6", resource, { .max_instructions = 4 });
@@ -155,7 +155,7 @@ TEST(Compiler, HonoursLoweredLimits) {
     EXPECT_EQ(program.error(), (CompileError{ CompileErrorCode::TooLong, 3, 1 }));
 }
 
-#if defined(__cpp_exceptions)
+#ifdef __cpp_exceptions
 TEST(Compiler, ReportsOutOfMemoryWhenTheResourceFails) {
     testing::CountingResource failing(true);
     const auto program = Compile("x + 1", &failing);
@@ -170,8 +170,8 @@ TEST(Compiler, UsesOnlyTheGivenResource) {
         const auto program = Compile("x * 4 + 1.6", &resource);
         ASSERT_TRUE(program);
         EXPECT_EQ(program->get_allocator().resource(), &resource);
-        EXPECT_GE(resource.Allocations(), 1u);
-        EXPECT_LE(resource.Allocations(), 3u);
+        EXPECT_GE(resource.Allocations(), 1U);
+        EXPECT_LE(resource.Allocations(), 3U);
     }
     EXPECT_EQ(resource.Deallocations(), resource.Allocations());
 }
@@ -190,11 +190,11 @@ TEST(Compiler, ProgramOwnsItsVariableNames) {
 TEST(Compiler, NumbersVariablesInOrderOfFirstAppearance) {
     const auto program = Compile("b + a + b");
     ASSERT_TRUE(program);
-    EXPECT_EQ(program->VariableCount(), 2u);
+    EXPECT_EQ(program->VariableCount(), 2U);
     EXPECT_EQ(program->VariableName(0), "b");
     EXPECT_EQ(program->VariableName(1), "a");
-    EXPECT_EQ(program->VariableIndex("a"), 1u);
-    EXPECT_EQ(program->VariableIndex("b"), 0u);
+    EXPECT_EQ(program->VariableIndex("a"), 1U);
+    EXPECT_EQ(program->VariableIndex("b"), 0U);
     EXPECT_EQ(program->VariableIndex("x"), std::nullopt);
 
     std::vector<std::string_view> names;
@@ -205,23 +205,23 @@ TEST(Compiler, NumbersVariablesInOrderOfFirstAppearance) {
 }
 
 TEST(Compiler, ReportsExactMaxStackDepth) {
-    const auto Depth = [](std::string_view text) {
+    const auto depth = [](std::string_view text) {
         const auto program = Compile(text);
         return program ? program->MaxStackDepth() : 255;
     };
-    EXPECT_EQ(Depth("x"), 1);
-    EXPECT_EQ(Depth("2 * 3"), 1);
-    EXPECT_EQ(Depth("x * 4 + 1.6"), 2);
-    EXPECT_EQ(Depth("1 + 2 * x"), 3);
-    EXPECT_EQ(Depth("sum(x, y, z)"), 3);
-    EXPECT_EQ(Depth("x ? y : z"), 1);
-    EXPECT_EQ(Depth("x && y"), 1);
+    EXPECT_EQ(depth("x"), 1);
+    EXPECT_EQ(depth("2 * 3"), 1);
+    EXPECT_EQ(depth("x * 4 + 1.6"), 2);
+    EXPECT_EQ(depth("1 + 2 * x"), 3);
+    EXPECT_EQ(depth("sum(x, y, z)"), 3);
+    EXPECT_EQ(depth("x ? y : z"), 1);
+    EXPECT_EQ(depth("x && y"), 1);
 }
 
 TEST(Compiler, IgnoresSurroundingWhitespace) {
     const auto program = Compile("  1\t+\n2  ");
     ASSERT_TRUE(program);
-    EXPECT_EQ(program->Evaluate({}), 3.0f);
+    EXPECT_EQ(program->Evaluate({}), 3.0F);
 }
 
 } // namespace eerie_leap::expression_engine

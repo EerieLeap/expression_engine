@@ -28,7 +28,7 @@ public:
 private:
     void* do_allocate(std::size_t bytes, std::size_t alignment) override {
         if(fail_) {
-#if defined(__cpp_exceptions)
+#ifdef __cpp_exceptions
             throw std::bad_alloc();
 #else
             std::abort();

@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <version>
 
-#if !defined(__cpp_lib_expected)
+#ifndef __cpp_lib_expected
     #error "eerie_leap_expression_engine needs std::expected: GCC 12+, or Clang 19+ with libstdc++ 13+"
 #endif
 
@@ -13,7 +13,7 @@ namespace eerie_leap::expression_engine {
 // template parameter.
 using Value = float;
 
-// Byte offset into the expression text; see limits::kMaxLength.
+// Byte offset into the expression text; see limits::MAX_LENGTH.
 using Position = std::uint16_t;
 
 } // namespace eerie_leap::expression_engine

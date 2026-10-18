@@ -16,7 +16,7 @@ enum class CompileErrorCode : std::uint8_t {
     UnexpectedToken,        // a token where another was expected
     UnexpectedEnd,          // the text ends inside an expression
     UnbalancedParenthesis,  // a "(" without ")" or a ")" without "("
-    UnknownFunction,        // name followed by "(" that is not in kFunctions
+    UnknownFunction,        // name followed by "(" that is not in FUNCTIONS
     WrongArgumentCount,     // outside the function's range or above max_arguments
     AssignmentNotSupported, // "=": the language has no assignment; its own code so the message says so
     IntegerLiteralNotExact, // a hex or binary literal that float cannot hold exactly
@@ -27,7 +27,7 @@ enum class CompileErrorCode : std::uint8_t {
     OutOfMemory,            // the memory resource failed (only when exceptions are enabled)
 };
 
-inline constexpr std::size_t kCompileErrorCodeCount = 16;
+inline constexpr std::size_t COMPILE_ERROR_CODE_COUNT = 16;
 
 struct CompileError {
     CompileErrorCode code;
